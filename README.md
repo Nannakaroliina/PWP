@@ -37,3 +37,24 @@ pip-compile --upgrade-package <package>
 ```shell
 pip-sync
 ```
+
+### Project runnable
+
+The project works with flask, to run it let's first make script files runnable:
+
+```shell
+chmod +x run_app.sh
+chmod +x delete_database.sh
+```
+
+After this you can run the project with:
+
+```shell
+./run_app.sh
+```
+
+After use, you can delete database if you wish:
+
+```shell
+./delete_database.sh
+```
