@@ -11,3 +11,27 @@ class Region(db.Model):
     grapes = db.relationship("Grape", back_populates="region")
     # reference to
     country = db.relationship("Country", back_populates="regions")
+
+    def serialize(self):
+        doc = {
+            "name": self.name,
+            "country": self.country.name
+        }
+
+        return doc
+    
+    @classmethod
+    def find_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
