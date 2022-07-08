@@ -15,6 +15,17 @@ python3 -m venv pwp
 source pwp/bin/activate
 ```
 
+## Required dependencies
+
+To keep all requirements and pinned requirements up-to-date
+this project uses pip-tools and requirements.in file to provide 
+all needed dependencies which needs to be installed:
+
+- Flask for creating the web application
+- Flask SQLAlchemy for SQLAlchemy support
+- Flask RESTful for building REST API
+- Flasgger for OpenAPI specification
+
 ### Install pip-tools for package management
 
 ```shell
@@ -22,6 +33,10 @@ pip install pip-tools
 ```
 
 ### Install required packages with pip-tools
+
+This will generate or update existing our requirements.txt file which
+contains all needed dependencies and this is used for
+pip-sync command which makes sure all the dependencies are installed.
 
 ```shell
 pip-compile ./requirements.in
@@ -38,7 +53,7 @@ pip-compile --upgrade-package <package>
 pip-sync
 ```
 
-### Project runnable
+## Project runnable
 
 The project works with flask, to run it let's first make script files runnable:
 

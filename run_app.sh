@@ -12,7 +12,7 @@ else
   echo "[INFO] Initialize database"
   flask create-tables
   echo "[INFO] Populating database"
-#  flask populate-database
+  flask populate-database
   echo "[INFO] Database initialized and populated, let's continue..."
 fi
 
