@@ -40,23 +40,23 @@ def populate_database_cmd():
     :return db content:
     """
     italy = Country(name='Italy')
-    db.session.add(italy)
+    italy.add()
     france = Country(name='France')
-    db.session.add(france)
+    france.add()
     portugal = Country(name='Portugal')
-    db.session.add(portugal)
+    portugal.add()
 
     tuscany = Region(name='Tuscany')
     tuscany.country = italy
-    db.session.add(tuscany)
+    tuscany.add()
 
     loire_valley = Region(name='Loire Valley')
     loire_valley.country = france
-    db.session.add(loire_valley)
+    loire_valley.add()
 
     norte = Region(name='Norte')
     norte.country = portugal
-    db.session.add(norte)
+    norte.add()
 
     tenuta_sette_ponti = Producer(name='Tenuta Sette Ponti',
                                   description="A story of passion, dedication, and especially a great love for "
@@ -65,14 +65,14 @@ def populate_database_cmd():
                                               "for the land and its balance, and staying in step with genuine "
                                               "agricultural and ecological expertise.")
     tenuta_sette_ponti.region = tuscany
-    db.session.add(tenuta_sette_ponti)
+    tenuta_sette_ponti.add()
 
     chateau_du_poyet = Producer(name='Château du Poyet',
                                 description='Château du Poyet is well regarded estate producing Muscadet '
                                             'Sèvre-et-Maine from around 43 hectares in the village of Chapelle '
                                             'Heulin. It is owned by the Bonneau family.')
     chateau_du_poyet.region = loire_valley
-    db.session.add(chateau_du_poyet)
+    chateau_du_poyet.add()
 
     grahams = Producer(name='W. & J. Graham\'s',
                        description='The story of two families across three centuries. For almost two hundred '
@@ -86,14 +86,14 @@ def populate_database_cmd():
                                    'Port and the Douro for many generations, with ancestry dating back to '
                                    'the mid-17th century.')
     grahams.region = norte
-    db.session.add(grahams)
+    grahams.add()
 
     red = Wine_type(type='red')
-    db.session.add(red)
+    red.add()
     white = Wine_type(type='white')
-    db.session.add(white)
+    white.add()
     port = Wine_type(type='port')
-    db.session.add(port)
+    port.add()
 
     sangiovese = Grape(name='Sangiovese',
                        description='Sangiovese is the most cultivated red grape variety in Italy, known all over the '
@@ -101,7 +101,7 @@ def populate_database_cmd():
                                    'Montalcino and Supertuscan. "Sour and bitter to eat, but juicy and full of wine", '
                                    'Sangiovese is the undisputed king of the red wines of central Italy.')
     sangiovese.region = tuscany
-    db.session.add(sangiovese)
+    sangiovese.add()
 
     melon_de_bourgogne = Grape(name='Melon de Bourgogne',
                                description='Melon de Bourgogne is the white grape synonymous with the Muscadet '
@@ -111,7 +111,7 @@ def populate_database_cmd():
                                            'A saltiness can sometimes identified in the wine, suggestive of the '
                                            'region\'s maritime geography.')
     melon_de_bourgogne.region = loire_valley
-    db.session.add(melon_de_bourgogne)
+    melon_de_bourgogne.add()
 
     touriga_nacional = Grape(name='Touriga Nacional',
                              description='Touriga Nacional is a dark-skinned grape variety that is currently very '
@@ -121,7 +121,7 @@ def populate_database_cmd():
                                          'fortified wines of Oporto. Touriga Nacional has firm tannins, is expressive '
                                          'as a varietal wine and shows great aging potential.')
     touriga_nacional.region = norte
-    db.session.add(touriga_nacional)
+    touriga_nacional.add()
 
     crognolo_toscana = Wine(name='Crognolo Toscana', year_produced=2018, alcohol_percentage=14.5, volume=750,
                             picture='',
@@ -132,7 +132,7 @@ def populate_database_cmd():
     crognolo_toscana.wine_type = red
     crognolo_toscana.producer = tenuta_sette_ponti
     crognolo_toscana.grape = sangiovese
-    db.session.add(crognolo_toscana)
+    crognolo_toscana.add()
 
     muscadet = Wine(name='Muscadet Sèvre et Maine Sur Lie', year_produced=2018, alcohol_percentage=14.5, volume=750,
                     picture='',
@@ -144,7 +144,7 @@ def populate_database_cmd():
     muscadet.wine_type = white
     muscadet.producer = chateau_du_poyet
     muscadet.grape = melon_de_bourgogne
-    db.session.add(muscadet)
+    muscadet.add()
 
     grahams_port = Wine(name='20 year old tawny port', year_produced=2018, alcohol_percentage=20, volume=750,
                         picture='',
@@ -157,8 +157,7 @@ def populate_database_cmd():
     grahams_port.wine_type = port
     grahams_port.producer = grahams
     grahams_port.grape = touriga_nacional
-    db.session.add(grahams_port)
-    db.session.commit()
+    grahams_port.add()
 
 
 app.cli.add_command(create_tables_cmd)
