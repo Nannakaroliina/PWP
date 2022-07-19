@@ -10,7 +10,7 @@ class Wine(db.Model):
     year_produced = db.Column(db.Integer)
     alcohol_percentage = db.Column(db.Float(precision=2))
     volume = db.Column(db.Integer)
-    picture = db.Column(db.String(128))
+    picture = db.Column(db.String(500))
     description = db.Column(db.String(500))
     grape_id = db.Column(db.Integer, db.ForeignKey("grape.id"))
 

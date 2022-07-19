@@ -2,6 +2,7 @@ import click
 from flask import Flask, render_template
 from flask.cli import with_appcontext
 from src.database import db
+from src.libs.aws import AwsBucket
 from src.models.country import Country
 from src.models.grape import Grape
 from src.models.producer import Producer
@@ -12,6 +13,7 @@ from src.models.wine_type import Wine_type
 app = Flask(__name__)
 app.config.from_object('config.Config')
 db.init_app(app)
+s3 = AwsBucket()
 
 
 @app.route("/")
@@ -122,8 +124,9 @@ def populate_database_cmd():
     touriga_nacional.region = norte
     touriga_nacional.add()
 
+    crognolo_picture = s3.get_file_url('tenuta-sette-ponti-crognolo-toscana.png')
     crognolo_toscana = Wine(name='Crognolo Toscana', year_produced=2018, alcohol_percentage=14.5, volume=750,
-                            picture='',
+                            picture=crognolo_picture,
                             description='Made with 85% Sangiovese, 8% Merlot and 7% Cabernet Sauvignon, this opens '
                                         'with aromas of plum, tobacco and baking spice. The concentrated palate '
                                         'offers blackberry jam, licorice and powdered sage alongside grainy tannins.',
@@ -133,8 +136,9 @@ def populate_database_cmd():
     crognolo_toscana.grape = sangiovese
     crognolo_toscana.add()
 
+    muscadet_picture = s3.get_file_url('chateau-de-poyet-muscadet-sevre-et-maine-sur-lie.png')
     muscadet = Wine(name='Muscadet Sèvre et Maine Sur Lie', year_produced=2018, alcohol_percentage=14.5, volume=750,
-                    picture='',
+                    picture=muscadet_picture,
                     description='A nice crisp drink. Pale in colour with a nice "tang" on the mouth. Absolutely '
                                 'quaffable. As all Muscadet Sèvre et Maine sur Lie, Château du Poyet keeps its wine '
                                 'on lees all over the winter and cannot bottle them before the 3rd Thursday of March. '
@@ -145,8 +149,9 @@ def populate_database_cmd():
     muscadet.grape = melon_de_bourgogne
     muscadet.add()
 
+    grahams_picture = 'grahams-20-years-old-tawny-port.png'
     grahams_port = Wine(name='20 year old tawny port', year_produced=2018, alcohol_percentage=20, volume=750,
-                        picture='',
+                        picture=grahams_picture,
                         description='Graham’s 20 Year Old Tawny has an amber, golden tawny colour. On the nose, '
                                     'it shows an excellent bouquet with a characteristic ‘nutty’ character and '
                                     'delicious mature fruit with hints of orange peel, exquisitely mellowed by '

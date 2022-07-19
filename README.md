@@ -26,6 +26,8 @@ all needed dependencies which needs to be installed:
 - Flask RESTful for building REST API
 - Flasgger for OpenAPI specification
 - Flask Uploads for image uploads and serving
+- boto3 for storing pictures and serving them
+- python-dotenv for reading env configurations
 
 ### Install pip-tools for package management
 
