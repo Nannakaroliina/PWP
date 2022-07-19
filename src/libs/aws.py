@@ -1,7 +1,6 @@
 import logging
 import boto3
-from botocore.exceptions import NoCredentialsError, ClientError
-from werkzeug.utils import secure_filename
+from botocore.exceptions import ClientError
 from config import Config
 
 
@@ -27,22 +26,6 @@ class AwsBucket:
             logging.error(e)
             return None
         return response
-
-    def upload_to_aws(self, file, acl="public-read"):
-        filename = secure_filename(file.filename)
-        try:
-            self.s3.upload_fileobj(file,
-                                   self.bucket,
-                                   file.filename,
-                                   ExtraArgs={"ACL": acl, "ContentType": file.content_type}
-                                   )
-        except NoCredentialsError:
-            print("Credentials not available")
-        except Exception as e:
-            print("Something Happened: ", e)
-            return e
-
-        return file.filename
 
     def get_file_url(self, file_name):
         try:
