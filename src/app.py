@@ -149,7 +149,7 @@ def populate_database_cmd():
     muscadet.grape = melon_de_bourgogne
     muscadet.add()
 
-    grahams_picture = 'grahams-20-years-old-tawny-port.png'
+    grahams_picture = s3.get_file_url('grahams-20-years-old-tawny-port.png')
     grahams_port = Wine(name='20 year old tawny port', year_produced=2018, alcohol_percentage=20, volume=750,
                         picture=grahams_picture,
                         description='Graham’s 20 Year Old Tawny has an amber, golden tawny colour. On the nose, '
