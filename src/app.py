@@ -1,23 +1,22 @@
 import click
-from flask import Flask
+from flask import Flask, render_template
 from flask.cli import with_appcontext
-from .database import db
-from .models.country import Country
-from .models.grape import Grape
-from .models.producer import Producer
-from .models.region import Region
-from .models.wine import Wine
-from .models.wine_type import Wine_type
+from src.database import db
+from src.models.country import Country
+from src.models.grape import Grape
+from src.models.producer import Producer
+from src.models.region import Region
+from src.models.wine import Wine
+from src.models.wine_type import Wine_type
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///../db/winebase.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config.from_object('config.Config')
 db.init_app(app)
 
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return render_template('index.html')
 
 
 @click.command("create-tables")

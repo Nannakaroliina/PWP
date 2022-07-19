@@ -3,3 +3,6 @@ flask_sqlalchemy
 flask_restful
 sqlalchemy
 flasgger
+python-dotenv
+boto3
+marshmallow

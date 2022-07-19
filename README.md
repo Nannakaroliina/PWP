@@ -25,6 +25,7 @@ all needed dependencies which needs to be installed:
 - Flask SQLAlchemy for SQLAlchemy support
 - Flask RESTful for building REST API
 - Flasgger for OpenAPI specification
+- Flask Uploads for image uploads and serving
 
 ### Install pip-tools for package management
 
