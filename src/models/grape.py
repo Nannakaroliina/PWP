@@ -1,3 +1,5 @@
+from typing import List
+
 from src.database import db
 
 
@@ -28,6 +30,10 @@ class Grape(db.Model):
     @classmethod
     def find_by_id(cls, id):
         return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def find_all(cls) -> List["Grape"]:
+        return cls.query.all()
 
     def add(self):
         db.session.add(self)
