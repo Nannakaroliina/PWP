@@ -1,6 +1,8 @@
 import click
 from flask import Flask, render_template
 from flask.cli import with_appcontext
+from flask_restful import Api
+
 from src.database import db
 from src.libs.aws import AwsBucket
 from src.models.country import Country
@@ -9,11 +11,13 @@ from src.models.producer import Producer
 from src.models.region import Region
 from src.models.wine import Wine
 from src.models.wine_type import Wine_type
+from src.resources.wine import WineItem, WineList
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
 db.init_app(app)
 s3 = AwsBucket()
+api = Api(app)
 
 
 @app.route("/")
@@ -167,3 +171,6 @@ def populate_database_cmd():
 app.cli.add_command(create_tables_cmd)
 app.cli.add_command(delete_tables_cmd)
 app.cli.add_command(populate_database_cmd)
+
+api.add_resource(WineItem, "/wines/<string:name>")
+api.add_resource(WineList, "/wines")
