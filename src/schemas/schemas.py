@@ -1,5 +1,13 @@
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, post_load
 from marshmallow.validate import Regexp, Length, Range
+
+from src.models.country import Country
+from src.models.grape import Grape
+from src.models.producer import Producer
+from src.models.region import Region
+from src.models.user import User
+from src.models.wine import Wine
+from src.models.wine_type import Wine_type
 
 email_regex = Regexp(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
 password_regex = Regexp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$')
@@ -11,6 +19,10 @@ class UserSchema(Schema):
     password = fields.Str(load_only=True, validate=Length(min=8, max=128), required=True)
     email = fields.Str(validate=email_regex, required=True)
     role = fields.Str(required=True, validate=Length(max=32))
+
+    @post_load
+    def make_user(self, data, **kwargs):
+        return User(**data)
 
 
 class WineSchema(Schema):
@@ -28,11 +40,19 @@ class WineSchema(Schema):
     description = fields.Str(validate=Length(max=500))
     grape = fields.Nested(lambda: GrapeSchema(only=('name',)))
 
+    @post_load
+    def make_wine(self, data, **kwargs):
+        return Wine(**data)
+
 
 class WineTypeSchema(Schema):
     id = fields.Int(dump_only=True)
     type = fields.Str(required=True, validate=Length(max=64))
     wines = fields.List(fields.Nested(WineSchema(exclude=('wine_type',))))
+
+    @post_load
+    def make_wine_type(self, data, **kwargs):
+        return Wine_type(**data)
 
 
 class ProducerSchema(Schema):
@@ -42,11 +62,19 @@ class ProducerSchema(Schema):
     description = fields.Str(validate=Length(max=500))
     wines = fields.List(fields.Nested(WineSchema(exclude=('producer',))))
 
+    @post_load
+    def make_producer(self, data, **kwargs):
+        return Producer(**data)
+
 
 class CountrySchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True, validate=Length(max=64))
     regions = fields.List(fields.Nested(lambda: RegionSchema(exclude=('country',))))
+
+    @post_load
+    def make_country(self, data, **kwargs):
+        return Country(**data)
 
 
 class GrapeSchema(Schema):
@@ -56,6 +84,10 @@ class GrapeSchema(Schema):
     description = fields.Str(validate=Length(max=500))
     wines = fields.List(fields.Nested(WineSchema(exclude=('grape',))))
 
+    @post_load
+    def make_grape(self, data, **kwargs):
+        return Grape(**data)
+
 
 class RegionSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -63,3 +95,7 @@ class RegionSchema(Schema):
     country = fields.Nested(CountrySchema(only=('name',)))
     producers = fields.List(fields.Nested(ProducerSchema(exclude=('region',))))
     grapes = fields.List(fields.Nested(GrapeSchema(exclude=('region',))))
+
+    @post_load
+    def make_region(self, data, **kwargs):
+        return Region(**data)
