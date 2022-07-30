@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema, post_load
-from marshmallow.validate import Regexp, Length, Range
+from marshmallow.validate import Regexp, Length, Range, OneOf
 
 from src.models.country import Country
 from src.models.grape import Grape
@@ -16,9 +16,9 @@ password_regex = Regexp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     username = fields.Str(required=True, validate=Length(max=128))
-    password = fields.Str(load_only=True, validate=Length(min=8, max=128), required=True)
-    email = fields.Str(validate=email_regex, required=True)
-    role = fields.Str(required=True, validate=Length(max=32))
+    password = fields.Str(load_only=True, validate=password_regex, required=True)
+    email = fields.Str(validate=email_regex)
+    role = fields.Str(validate=OneOf(['developer', 'producer', 'expert']))
 
     @post_load
     def make_user(self, data, **kwargs):

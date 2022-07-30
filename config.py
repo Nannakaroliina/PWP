@@ -16,3 +16,6 @@ class Config:
     AWS_BUCKET = environ.get("AWS_BUCKET")
     ACCESS_KEY_ID = environ.get("ACCESS_KEY_ID")
     ACCESS_KEY_SECRET = environ.get("ACCESS_KEY_SECRET")
+
+    # Authentication
+    JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY")
