@@ -5,8 +5,8 @@ from src.database import db
 
 class Producer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
-    region_id = db.Column(db.Integer, db.ForeignKey("region.id"), nullable=False)
+    name = db.Column(db.String(128))
+    region_id = db.Column(db.Integer, db.ForeignKey("region.id"))
     description = db.Column(db.String(500))
 
     # referenced from
