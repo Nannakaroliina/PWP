@@ -1,6 +1,7 @@
 import click
 from flask import Flask, render_template
 from flask.cli import with_appcontext
+from flask_jwt_extended import JWTManager
 from flask_restful import Api
 
 from src.database import db
@@ -11,10 +12,11 @@ from src.models.producer import Producer
 from src.models.region import Region
 from src.models.wine import Wine
 from src.models.wine_type import Wine_type
-from src.resources.wine import WineItem, WineList
+from src.resources.user import UserLogin, UserLogout, UserRegister, UserItem
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
+jwt = JWTManager(app)
 db.init_app(app)
 s3 = AwsBucket()
 api = Api(app)
@@ -172,5 +174,7 @@ app.cli.add_command(create_tables_cmd)
 app.cli.add_command(delete_tables_cmd)
 app.cli.add_command(populate_database_cmd)
 
-api.add_resource(WineItem, "/wines/<string:name>")
-api.add_resource(WineList, "/wines")
+api.add_resource(UserLogin, "/login")
+api.add_resource(UserLogout, "/logout")
+api.add_resource(UserRegister, "/register")
+api.add_resource(UserItem, "/user")

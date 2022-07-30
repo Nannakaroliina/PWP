@@ -28,6 +28,8 @@ all needed dependencies which needs to be installed:
 - Flask Uploads for image uploads and serving
 - boto3 for storing pictures and serving them
 - python-dotenv for reading env configurations
+- flask-jwt-extended for JSON Web Token based authentication
+
 
 ### Install pip-tools for package management
 

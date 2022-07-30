@@ -6,3 +6,4 @@ flasgger
 python-dotenv
 boto3
 marshmallow
+flask-jwt-extended
