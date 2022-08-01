@@ -33,8 +33,8 @@ class WineSchema(Schema):
     producer = fields.Nested(lambda: ProducerSchema(only=('name',)))
     # production year min is based on oldest known wine
     year_produced = fields.Int(validate=Range(min=1867, max=2022))
-    alcohol_percentage = fields.Float(precision=2)
-    volume = fields.Int(validate=Range(min=187, max=1500), missing=750)
+    alcohol_percentage = fields.Float(metadata={"precision": 2})
+    volume = fields.Int(validate=Range(min=187, max=1500), load_default=750)
     # could add the url regex but then again, picture might not always be available
     picture = fields.Str(validate=Length(max=500))
     description = fields.Str(validate=Length(max=500))

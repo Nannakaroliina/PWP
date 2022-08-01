@@ -29,6 +29,8 @@ all needed dependencies which needs to be installed:
 - boto3 for storing pictures and serving them
 - python-dotenv for reading env configurations
 - flask-jwt-extended for JSON Web Token based authentication
+- pytest for testing
+- pytest-cov for coverage report
 
 
 ### Install pip-tools for package management
@@ -77,4 +79,21 @@ After use, you can delete database if you wish:
 
 ```shell
 ./delete_database.sh
+```
+
+
+## Running tests
+
+The test are done with pytest, it provides the results of the tests,
+including the warnings if there is any. Finally it gives coverage report.
+To run them let's first make script files runnable:
+
+```shell
+chmod +x run_tests.sh
+```
+
+After this you can run the tests with:
+
+```shell
+./run_tests.sh
 ```
