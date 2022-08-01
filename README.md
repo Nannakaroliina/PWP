@@ -30,7 +30,7 @@ all needed dependencies which needs to be installed:
 - python-dotenv for reading env configurations
 - flask-jwt-extended for JSON Web Token based authentication
 - pytest for testing
-- pytest-cov for
+- pytest-cov for coverage report
 
 
 ### Install pip-tools for package management
