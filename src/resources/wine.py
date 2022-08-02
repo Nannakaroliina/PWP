@@ -111,7 +111,6 @@ class WineItem(Resource):
         item = Wine.find_by_name(name)
 
         if item:
-            print(item)
             item.name = content["name"]
 
             if "wine_type" in content:
@@ -166,4 +165,4 @@ class WineItem(Resource):
         except IntegrityError:
             return {"[ERROR]": ERROR_INSTERTING}, 500
 
-        
+        return wine_schema.dump(item), 200
