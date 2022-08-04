@@ -1,8 +1,17 @@
-from flask_restuful import Resource
+from sqlite3 import IntegrityError
+from urllib import request
+
+from flask import request
+from flask_jwt_extended import jwt_required
+from flask_restful import Resource
+from marshmallow import ValidationError
 
 from src.models.region import Region
-from src.schemas.schemas import RegionSchema
+from src.models.country import Country
+from src.schemas.schemas import CountrySchema, RegionSchema
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSTERTING, NOT_JSON
 
+country_schema = CountrySchema()
 region_schema = RegionSchema()
 region_list_schema = RegionSchema(many=True)
 
@@ -10,11 +19,97 @@ region_list_schema = RegionSchema(many=True)
 class RegionList(Resource):
     @classmethod
     def get(cls):
+        
         return {"regions": region_list_schema.dump(Region.find_all())}, 200
+
+    @classmethod
+    @jwt_required()
+    def post(cls):
+
+        if not request.is_json:
+            return {"[ERROR]": NOT_JSON}, 415
+
+        content = request.get_json()
+
+        try:
+            region = region_schema.load(content)
+        except ValidationError as err:
+            return err.messages, 400
+
+        if Region.find_by_name(content["name"]):
+            return {"[ERROR]": ALREADY_EXISTS}, 409
+
+        #check if user included country
+        if "country" in content:
+
+            country = Country.find_by_name(region.country.name)
+
+            if country:
+                region.country = None
+                region.country = country
+
+        try:
+            region.add()
+        except IntegrityError:
+            return {"[ERROR]": ERROR_INSTERTING}, 500
+
+        return region_schema.dump(region), 201
 
     
 class RegionItem(Resource):
+
     @classmethod
     def get(cls, name):
         db_region = Region.find_by_name(name)
         return region_schema.dump(db_region)
+
+    @classmethod
+    @jwt_required()
+    def delete(cls, name):
+
+        item = Region.find_by_name(name)
+
+        if item:
+            try:
+                item.delete()
+                return {"message": "{} deleted".format(item.name)}, 200
+            except:
+                return {"[ERROR]": ERROR_DELETING}, 500
+
+        return {"[ERROR]": "Region {} not found".format(name)}, 404
+
+    @classmethod
+    @jwt_required()
+    def put(cls, name):
+
+        if not request.is_json:
+            return {"[ERROR]": NOT_JSON}, 415
+
+        content = request.get_json()
+
+        item = Region.find_by_name(name)
+
+        if item:
+
+            item.name = content["name"]
+
+            if "country" in content:
+                try:
+                    country = Country.find_by_name(content["country"]["name"])
+                    item.country_id = country.id
+                except AttributeError:
+                    return {"[ERROR]": "Country not found"}, 404
+        else:
+            return {"[ERROR]": "Region not found"}, 404
+
+        try:
+            item = region_schema.load(content)
+        except ValidationError as err:
+            return err.messages, 400
+
+        try:
+            item.add()
+        except IntegrityError:
+            return {"[ERROR]": ERROR_INSTERTING}, 500
+        
+        return region_schema.dump(item), 200
