@@ -68,9 +68,9 @@ class UserLogin(Resource):
 
         if user and check_password_hash(user.password, user_data.password):
             response = jsonify({"[INFO]": LOGIN_SUCCESSFUL})
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=user.username)
             set_access_cookies(response, access_token)
-            return 'token: ' + access_token, 200
+            return 'Bearer ' + access_token, 200
 
         return {"[ERROR]": INVALID_CREDENTIALS}, 401
 

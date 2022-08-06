@@ -8,7 +8,7 @@ from marshmallow import ValidationError
 from src.models.grape import Grape
 from src.models.region import Region
 from src.schemas.schemas import GrapeSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSTERTING, NOT_JSON
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON
 
 grape_schema = GrapeSchema()
 grape_list_schema = GrapeSchema(many=True)
@@ -48,7 +48,7 @@ class GrapeList(Resource):
         try:
             grape.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return grape_schema.dump(grape), 201
 
@@ -69,7 +69,7 @@ class GrapeItem(Resource):
         if item:
             try:
                 item.delete()
-                return {"message": "{} deleted".format(item.name)}, 200
+                return {"[INFO]": "{} deleted".format(item.name)}, 200
             except:
                 return {"[ERROR]": ERROR_DELETING}, 500
         
@@ -109,6 +109,6 @@ class GrapeItem(Resource):
         try:
             item.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return grape_schema.dump(item), 200

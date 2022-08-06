@@ -31,7 +31,7 @@ class AwsBucket:
         try:
             public_url = self.s3.generate_presigned_url('get_object',
                                                         Params={'Bucket': self.bucket, 'Key': file_name},
-                                                        ExpiresIn=3600)
+                                                        ExpiresIn=604800)
             return public_url
         except ClientError as e:
             logging.error(e)
@@ -43,9 +43,17 @@ class AwsBucket:
             for item in self.s3.list_objects(Bucket=self.bucket)['Contents']:
                 presigned_url = self.s3.generate_presigned_url('get_object',
                                                                Params={'Bucket': self.bucket, 'Key': item['Key']},
-                                                               ExpiresIn=3600)
+                                                               ExpiresIn=604800)
                 public_urls.append(presigned_url)
                 return public_urls
         except ClientError as e:
             logging.error(e)
             return None
+
+    def check_if_file_exists(self, file_name):
+        try:
+            self.s3.head_object(Bucket=self.bucket, Key=file_name)
+            return True
+        except ClientError as e:
+            logging.error(e)
+            return False

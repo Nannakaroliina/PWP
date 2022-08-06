@@ -9,7 +9,7 @@ from marshmallow import ValidationError
 from src.models.region import Region
 from src.models.country import Country
 from src.schemas.schemas import CountrySchema, RegionSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSTERTING, NOT_JSON
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON
 
 country_schema = CountrySchema()
 region_schema = RegionSchema()
@@ -51,7 +51,7 @@ class RegionList(Resource):
         try:
             region.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return region_schema.dump(region), 201
 
@@ -72,7 +72,7 @@ class RegionItem(Resource):
         if item:
             try:
                 item.delete()
-                return {"message": "{} deleted".format(item.name)}, 200
+                return {"[INFO]": "{} deleted".format(item.name)}, 200
             except:
                 return {"[ERROR]": ERROR_DELETING}, 500
 
@@ -110,6 +110,6 @@ class RegionItem(Resource):
         try:
             item.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
         
         return region_schema.dump(item), 200

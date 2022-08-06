@@ -8,7 +8,7 @@ from marshmallow import ValidationError
 from src.models.producer import Producer
 from src.models.region import Region
 from src.schemas.schemas import ProducerSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSTERTING, NOT_JSON
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON
 
 producer_schema = ProducerSchema()
 producer_list_schema = ProducerSchema(many=True)
@@ -21,6 +21,7 @@ class ProducerList(Resource):
         return {"producers": producer_list_schema.dump(Producer.find_all())}, 200
 
     @classmethod
+    @jwt_required()
     def post(cls):
 
         if not request.is_json:
@@ -48,7 +49,7 @@ class ProducerList(Resource):
         try:
             producer.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return producer_schema.dump(producer), 201
 
@@ -62,6 +63,7 @@ class ProducerItem(Resource):
         return producer_schema.dump(db_producer)
 
     @classmethod
+    @jwt_required()
     def delete(cls, name):
 
         item = Producer.find_by_name(name)
@@ -69,13 +71,14 @@ class ProducerItem(Resource):
         if item:
             try:
                 item.delete()
-                return {"message": "{} deleted".format(item.name)}, 200
+                return {"[INFO]": "{} deleted".format(item.name)}, 200
             except:
                 return {"[ERROR]": ERROR_DELETING}, 500
 
         return {"[ERROR]": "Producer {} not found".format(name)}, 404
 
     @classmethod
+    @jwt_required()
     def put(cls, name):
 
         if not request.is_json:
@@ -110,6 +113,6 @@ class ProducerItem(Resource):
         try:
             item.add()
         except IntegrityError:
-            return {"[ERROR]": ERROR_INSTERTING}, 500
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return producer_schema.dump(item), 200
