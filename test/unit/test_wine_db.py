@@ -439,10 +439,3 @@ def test_user_required_columns(db_handle):
     with pytest.raises(IntegrityError):
         db_handle.session.commit()
 
-    db_handle.session.rollback()
-
-    user = _get_user()
-    user.email = None
-    db_handle.session.add(user)
-    with pytest.raises(IntegrityError):
-        db_handle.session.commit()

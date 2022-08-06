@@ -14,7 +14,7 @@ from src.models.wine import Wine
 from src.models.wine_type import Wine_type
 from src.resources.country import CountryItem, CountryList
 from src.resources.grape import GrapeItem, GrapeList
-from src.resources.producer import ProducerList
+from src.resources.producer import ProducerList, ProducerItem
 from src.resources.region import RegionItem, RegionList
 from src.resources.user import UserLogin, UserLogout, UserRegister, UserItem
 from src.resources.wine import WineItem, WineList
@@ -190,6 +190,7 @@ api.add_resource(GrapeList, "/api/grapes")
 api.add_resource(Wine_typeItem, "/api/wine_type/<string:name>")
 api.add_resource(Wine_typeList, "/api/wine_types")
 api.add_resource(ProducerList, "/api/producers")
+api.add_resource(ProducerItem, "/api/producers/<string:name>")
 api.add_resource(RegionItem, "/api/regions/<string:name>")
 api.add_resource(RegionList, "/api/regions")
 api.add_resource(CountryItem, "/api/countries/<string:name>")

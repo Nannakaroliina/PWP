@@ -13,6 +13,7 @@ country_schema = CountrySchema()
 country_list_schema = CountrySchema(many=True)
 
 
+# noinspection DuplicatedCode
 class CountryList(Resource):
 
     @classmethod
@@ -24,7 +25,7 @@ class CountryList(Resource):
     def post(cls):
 
         if not request.is_json:
-            return {"[ERROR]": NOT_JSON}, 500
+            return {"[ERROR]": NOT_JSON}, 415
 
         content = request.get_json()
 

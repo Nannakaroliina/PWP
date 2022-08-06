@@ -14,6 +14,7 @@ producer_schema = ProducerSchema()
 producer_list_schema = ProducerSchema(many=True)
 
 
+# noinspection DuplicatedCode
 class ProducerList(Resource):
     
     @classmethod
@@ -23,7 +24,6 @@ class ProducerList(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
-
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
         
@@ -37,7 +37,7 @@ class ProducerList(Resource):
         if Producer.find_by_name(content["name"]):
             return {"[ERROR]": ALREADY_EXISTS}, 409
 
-        #check if user included region
+        # check if user included region
         if "region" in content:
 
             region = Region.find_by_name(producer.region.name)

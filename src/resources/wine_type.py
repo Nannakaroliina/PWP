@@ -26,9 +26,6 @@ class Wine_typeList(Resource):
 
         json_item = request.get_json()
 
-        if not json_item["type"]:
-            return {"[INFO]": "Wine type can't be empty"}, 400
-
         # try to validate the winetype
         try:
             item = wine_type_schema.load(json_item)
@@ -45,7 +42,7 @@ class Wine_typeList(Resource):
         except IntegrityError as err:
             return {"[ERROR]": ERROR_INSERTING}, 400
 
-        return wine_type_schema.dumps(item), 201
+        return wine_type_schema.dump(item), 201
 
 
 class Wine_typeItem(Resource):

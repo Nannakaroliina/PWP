@@ -35,7 +35,7 @@ class WineList(Resource):
         try:
             content = json.loads(request.form.get('data'))
         except BadRequest:
-            return {"[ERROR]": NOT_JSON}, 400
+            return {"[ERROR]": NOT_JSON}, 415
 
         if file:
             if check_file_and_proper_naming(file):

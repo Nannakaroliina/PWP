@@ -14,6 +14,7 @@ grape_schema = GrapeSchema()
 grape_list_schema = GrapeSchema(many=True)
 
 
+# noinspection DuplicatedCode
 class GrapeList(Resource):
 
     @classmethod
@@ -23,6 +24,7 @@ class GrapeList(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
+
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
@@ -36,10 +38,10 @@ class GrapeList(Resource):
         if Grape.find_by_name(content["name"]):
             return {"[ERROR]": ALREADY_EXISTS}, 409
 
-        #checking if the user included region
+        # checking if the user included region
         if "region" in content:
 
-            region = Region.find_by_type(grape.region.name)
+            region = Region.find_by_name(grape.region.name)
 
             if region:
                 grape.region = None
