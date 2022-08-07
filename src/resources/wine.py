@@ -1,10 +1,10 @@
 import json
-from sqlite3 import IntegrityError
+from sqlite3 import IntegrityError, InternalError
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from flask import request
 from marshmallow import ValidationError
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound
 
 from src.libs.helpers import check_file_and_proper_naming, upload_file
 from src.models.wine import Wine
@@ -14,7 +14,7 @@ from src.models.wine_type import Wine_type
 from src.schemas.schemas import GrapeSchema, ProducerSchema, WineSchema
 
 from src.utils.constants import \
-    ALREADY_EXISTS, NOT_JSON, ERROR_INSERTING, ERROR_DELETING
+    ALREADY_EXISTS, NOT_JSON, ERROR_INSERTING, ERROR_DELETING, NOT_FOUND
 
 grape_schema = GrapeSchema()
 producer_schema = ProducerSchema()
@@ -90,7 +90,10 @@ class WineItem(Resource):
     @classmethod
     def get(cls, name):
         db_wine = Wine.find_by_name(name)
-        return wine_schema.dump(db_wine)
+        if db_wine is not None:
+            return wine_schema.dump(db_wine), 200
+        else:
+            return {"[INFO]": NOT_FOUND}, 404
 
     @classmethod
     @jwt_required()
@@ -101,14 +104,14 @@ class WineItem(Resource):
             try:
                 item.delete()
                 return {"[INFO]": "{} deleted".format(item.name)}, 200
-            except:   
+            except InternalError:
                 return {"[ERROR]": ERROR_DELETING}, 500
         
         return {"[ERROR]": "Wine {} not found".format(name)}, 404
 
     @classmethod
     @jwt_required()
-    def put(cls, name):
+    def patch(cls, name):
         file = request.files.get('file')
         try:
             content = json.loads(request.form.get('data'))
@@ -116,23 +119,23 @@ class WineItem(Resource):
             return {"[ERROR]": NOT_JSON}, 400
 
         item = Wine.find_by_name(name)
-        try:
-            if "name" not in content:
-                content["name"] = item.name
-            wine = wine_schema.load(content)
-        except ValidationError as err:
-            return err.messages, 400
 
         if item:
-            if wine.name:
-                item.name = wine.name
+            try:
+                if "name" not in content:
+                    content["name"] = item.name
+                wine = wine_schema.load(content)
+            except ValidationError as err:
+                return err.messages, 400
+
+            item.name = wine.name
 
             if wine.wine_type:
                 try:
                     wine_type = Wine_type.find_by_type(wine.wine_type.type)
                     item.wine_type_id = wine_type.id
                 except AttributeError:
-                    return{"[ERROR]": "Wine_type not found"}
+                    return{"[ERROR]": "Wine_type not found"}, 404
             
             if wine.style:
                 item.style = wine.style
@@ -145,14 +148,14 @@ class WineItem(Resource):
                     grape = Grape.find_by_name(wine.grape.name)
                     item.grape_id = grape.id
                 except AttributeError:
-                    return {"[ERROR]": "Grape not found"}, 400
+                    return {"[ERROR]": "Grape not found"}, 404
 
             if wine.producer:
                 try:
                     producer = Producer.find_by_name(wine.producer.name)
                     item.producer_id = producer.id
                 except AttributeError:
-                    return {"ERROR": "Producer not found"}, 400
+                    return {"ERROR": "Producer not found"}, 404
                 
             if wine.year_produced:
                 item.year_produced = wine.year_produced
@@ -169,7 +172,7 @@ class WineItem(Resource):
                     item.picture = file_url
         
         else:
-            return {"[ERROR]": "Wine not found"}, 400
+            return {"[ERROR]": "Wine not found"}, 404
             
         try:
             item.add()

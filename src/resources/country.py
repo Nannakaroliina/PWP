@@ -1,4 +1,4 @@
-from sqlite3 import IntegrityError
+from sqlite3 import IntegrityError, InternalError
 
 from flask import request
 from flask_jwt_extended import jwt_required
@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 
 from src.models.country import Country
 from src.schemas.schemas import CountrySchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND
 
 country_schema = CountrySchema()
 country_list_schema = CountrySchema(many=True)
@@ -50,7 +50,10 @@ class CountryItem(Resource):
     @classmethod
     def get(cls, name):
         db_country = Country.find_by_name(name)
-        return country_schema.dump(db_country)
+        if db_country is not None:
+            return country_schema.dump(db_country), 200
+        else:
+            return {"[INFO]": NOT_FOUND}, 404
 
     @classmethod
     @jwt_required()
@@ -62,31 +65,30 @@ class CountryItem(Resource):
             try:
                 item.delete()
                 return {"[INFO]": "{} deleted".format(item.name)}, 200
-            except:
+            except InternalError:
                 return {"[ERROR]": ERROR_DELETING}, 500
 
         return {"[ERROR]": "Country {} not found".format(name)}, 404
 
     @classmethod
     @jwt_required()
-    def put(cls, name):
+    def patch(cls, name):
 
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
         content = request.get_json()
-
         item = Country.find_by_name(name)
 
         if item:
-            item.name = content["name"]
+            try:
+                country = country_schema.load(content)
+            except ValidationError as err:
+                return err.messages, 400
+
+            item.name = country.name
         else:
             return {"[ERROR]": "Country not found"}, 404
-
-        try:
-            item = country_schema.load(content)
-        except ValidationError as err:
-            return err.messages, 400
 
         try:
             item.add()

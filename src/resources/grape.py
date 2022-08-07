@@ -1,4 +1,4 @@
-from sqlite3 import IntegrityError
+from sqlite3 import IntegrityError, InternalError
 
 from flask import request
 from flask_jwt_extended import jwt_required
@@ -8,7 +8,7 @@ from marshmallow import ValidationError
 from src.models.grape import Grape
 from src.models.region import Region
 from src.schemas.schemas import GrapeSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND
 
 grape_schema = GrapeSchema()
 grape_list_schema = GrapeSchema(many=True)
@@ -60,7 +60,10 @@ class GrapeItem(Resource):
     @classmethod
     def get(cls, name):
         db_grape = Grape.find_by_name(name)
-        return grape_schema.dump(db_grape)
+        if db_grape is not None:
+            return grape_schema.dump(db_grape), 200
+        else:
+            return {"[INFO]": NOT_FOUND}, 404
 
     @classmethod
     @jwt_required()
@@ -72,41 +75,42 @@ class GrapeItem(Resource):
             try:
                 item.delete()
                 return {"[INFO]": "{} deleted".format(item.name)}, 200
-            except:
+            except InternalError:
                 return {"[ERROR]": ERROR_DELETING}, 500
         
         return {"[ERROR]": "Grape {} not found".format(name)}, 404
 
     @classmethod
     @jwt_required()
-    def put(cls, name):
+    def patch(cls, name):
 
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
         content = request.get_json()
-
         item = Grape.find_by_name(name)
 
         if item:
-            item.name = content["name"]
+            try:
+                if "name" not in content:
+                    content["name"] = item.name
+                grape = grape_schema.load(content)
+            except ValidationError as err:
+                return err.messages, 400
 
-            if "region" in content:
+            item.name = grape.name
+
+            if grape.region:
                 try:
-                    region = Region.find_by_name(content["region"]["name"])
+                    region = Region.find_by_name(grape.region.name)
                     item.region_id = region.id
                 except AttributeError:
                     return {"[ERROR]": "Region not found"}, 404
 
-            if "description" in content:
-                item.description = content["description"]
+            if grape.description:
+                item.description = grape.description
         else:
             return {"[ERROR]": "Grape not found"}, 404
-
-        try: 
-            item = grape_schema.load(content)
-        except ValidationError as err:
-            return err.messages, 400
 
         try:
             item.add()

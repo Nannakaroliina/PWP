@@ -1,4 +1,4 @@
-from sqlite3 import IntegrityError
+from sqlite3 import IntegrityError, InternalError
 
 from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
@@ -7,12 +7,13 @@ from flask import request
 
 from src.models.wine_type import Wine_type
 from src.schemas.schemas import WineTypeSchema
-from src.utils.constants import NOT_JSON, ERROR_INSERTING
+from src.utils.constants import NOT_JSON, ERROR_INSERTING, NOT_FOUND, ERROR_DELETING
 
 wine_type_schema = WineTypeSchema()
 wine_type_list_schema = WineTypeSchema(many=True)
 
 
+# noinspection DuplicatedCode
 class Wine_typeList(Resource):
     @classmethod
     def get(cls):
@@ -39,8 +40,8 @@ class Wine_typeList(Resource):
         # try add new type to db
         try:
             item.add()
-        except IntegrityError as err:
-            return {"[ERROR]": ERROR_INSERTING}, 400
+        except IntegrityError:
+            return {"[ERROR]": ERROR_INSERTING}, 500
 
         return wine_type_schema.dump(item), 201
 
@@ -49,4 +50,49 @@ class Wine_typeItem(Resource):
     @classmethod
     def get(cls, name):
         db_wine_type = Wine_type.find_by_type(name)
-        return wine_type_schema.dump(db_wine_type)
+        if db_wine_type is not None:
+            return wine_type_schema.dump(db_wine_type), 200
+        else:
+            return {"[INFO]": NOT_FOUND}, 404
+
+    @classmethod
+    @jwt_required()
+    def delete(cls, name):
+
+        item = Wine_type.find_by_type(name)
+
+        if item:
+            try:
+                item.delete()
+                return {"[INFO]": "{} deleted".format(item.type)}, 200
+            except InternalError:
+                return {"[ERROR]": ERROR_DELETING}, 500
+
+        return {"[ERROR]": "Wine_type {} not found".format(name)}, 404
+
+    @classmethod
+    @jwt_required()
+    def patch(cls, name):
+
+        if not request.is_json:
+            return {"[ERROR]": NOT_JSON}, 415
+
+        content = request.get_json()
+        item = Wine_type.find_by_type(name)
+
+        if item:
+            try:
+                wine_type = wine_type_schema.load(content)
+            except ValidationError as err:
+                return err.messages, 400
+
+            item.type = wine_type.type
+        else:
+            return {"[ERROR]": "Wine type not found"}, 404
+
+        try:
+            item.add()
+        except IntegrityError:
+            return {"[ERROR]": ERROR_INSERTING}, 500
+
+        return wine_type_schema.dump(item), 200

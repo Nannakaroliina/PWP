@@ -7,7 +7,7 @@ wine_schema = WineSchema()
 wine_list_schema = WineSchema(many=True)
 
 
-def _get_access_token(client):
+def _get_access_token_header(client):
 
     data = {
         "username": "tester",
@@ -16,6 +16,12 @@ def _get_access_token(client):
 
     client.post("/api/register", json=data)
     response = client.post("/api/login", json=data)
+    headers = {'Authorization': json.loads(response.data)}
+    return headers
+
+
+def _get_resource(client, resource_url):
+    response = client.get(resource_url)
     return json.loads(response.data)
 
 
@@ -68,8 +74,7 @@ class TestWineCollection(object):
             }
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         data = {
             'data': json.dumps(request_data),
             'file': None
@@ -89,8 +94,7 @@ class TestWineCollection(object):
         assert body["grape"]["name"] == request_data["grape"]["name"]
 
     def test_invalid_data_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         data = {
             'data': json.dumps({}),
             'file': None
@@ -99,8 +103,7 @@ class TestWineCollection(object):
         assert response.status_code == 400
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         data = {
             'data': json.dumps({"description": "test"}),
             'file': None
@@ -109,8 +112,7 @@ class TestWineCollection(object):
         assert response.status_code == 400
 
     def test_wine_exists_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         data = {
             'data': json.dumps({"name": "test wine 1"}),
             'file': None
@@ -129,10 +131,21 @@ class TestWineCollection(object):
 
 class TestWineItem(object):
 
-    RESOURCE_URL = "/api/wines/test%20wine%201"
+    RESOURCE_URL = "/api/wines"
+    WINE_URL = RESOURCE_URL + '/test%20wine%201'
+    FAKE_URL = RESOURCE_URL + '/test%20wine%206'
+
+    request_data = {
+        "description": "patching"
+    }
+
+    data = {
+        'data': json.dumps(request_data),
+        'file': None
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.WINE_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
@@ -146,6 +159,65 @@ class TestWineItem(object):
         assert "year_produced" in body
         assert "style" in body
         assert "alcohol_percentage" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.WINE_URL, headers=headers)
+        assert response.status_code == 200
+        wines = _get_resource(client, self.RESOURCE_URL)
+        assert len(wines) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.WINE_URL, data=self.data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.WINE_URL, data=self.data, headers=headers)
+        assert response.status_code == 200
+        wine = _get_resource(client, self.WINE_URL)
+        assert wine["description"] == "patching"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, data=self.data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_producer_not_found(self, client):
+        request_data = {
+            "producer": {
+                "name": "fake producer"
+            }
+        }
+
+        self.data['data'] = json.dumps(request_data)
+        headers = _get_access_token_header(client)
+        response = client.patch(self.WINE_URL, data=self.data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "producer": {
+                "description": "test validation fail"
+            }
+        }
+        self.data['data'] = json.dumps(request_data)
+        headers = _get_access_token_header(client)
+        response = client.patch(self.WINE_URL, data=self.data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.WINE_URL, data=self.data)
+        assert response.status_code == 401
 
 
 class TestWine_typeCollection(object):
@@ -165,22 +237,19 @@ class TestWine_typeCollection(object):
             assert "wines" in wine_type
 
     def test_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=self.request_data, headers=headers)
         assert response.status_code == 201
         body = json.loads(response.data)
         assert body["type"] == self.request_data["type"]
 
     def test_invalid_data_type_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={}, headers=headers)
         assert response.status_code == 415
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={"description": "test"}, headers=headers)
         assert response.status_code == 400
 
@@ -189,8 +258,7 @@ class TestWine_typeCollection(object):
             "type": "test type 1"
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=request_data, headers=headers)
         assert response.status_code == 409
 
@@ -201,15 +269,65 @@ class TestWine_typeCollection(object):
 
 class TestWine_typeItem(object):
 
-    RESOURCE_URL = "/api/wine_type/test%20type%201"
+    RESOURCE_URL = "/api/wine_types"
+    WINE_TYPE_URL = RESOURCE_URL + "/test%20type%201"
+    FAKE_URL = RESOURCE_URL + "/test%20type%206"
+    request_data = {
+        "type": "new type"
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.WINE_TYPE_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
         assert "type" in body
         assert "wines" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.WINE_TYPE_URL, headers=headers)
+        assert response.status_code == 200
+        wine_types = _get_resource(client, self.RESOURCE_URL)
+        assert len(wine_types) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.WINE_TYPE_URL, json=self.request_data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.WINE_TYPE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 200
+        wine_type = _get_resource(client, self.RESOURCE_URL + "/new%20type")
+        assert wine_type["type"] == "new type"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "description": "test validation fail"
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.WINE_TYPE_URL, json=request_data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.WINE_TYPE_URL, json=self.request_data)
+        assert response.status_code == 401
 
 
 class TestProducerCollection(object):
@@ -235,8 +353,7 @@ class TestProducerCollection(object):
             assert "wines" in producer
 
     def test_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=self.request_data, headers=headers)
         assert response.status_code == 201
         body = json.loads(response.data)
@@ -245,14 +362,12 @@ class TestProducerCollection(object):
         assert body["region"]["name"] == self.request_data["region"]["name"]
 
     def test_invalid_data_type_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, data={}, headers=headers)
         assert response.status_code == 415
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={"description": "test"}, headers=headers)
         assert response.status_code == 400
 
@@ -261,8 +376,7 @@ class TestProducerCollection(object):
             "name": "test producer 1"
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=request_data, headers=headers)
         assert response.status_code == 409
 
@@ -273,10 +387,15 @@ class TestProducerCollection(object):
 
 class TestProducerItem(object):
 
-    RESOURCE_URL = "/api/producers/test%20producer%201"
+    RESOURCE_URL = "/api/producers"
+    PRODUCER_URL = RESOURCE_URL + "/test%20producer%201"
+    FAKE_URL = RESOURCE_URL + "/test%20producer%206"
+    request_data = {
+        "description": "patching"
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.PRODUCER_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
@@ -284,6 +403,64 @@ class TestProducerItem(object):
         assert "description" in body
         assert "region" in body
         assert "wines" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.PRODUCER_URL, headers=headers)
+        assert response.status_code == 200
+        producers = _get_resource(client, self.RESOURCE_URL)
+        assert len(producers) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.PRODUCER_URL, json=self.request_data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.PRODUCER_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 200
+        producer = _get_resource(client, self.PRODUCER_URL)
+        assert producer["description"] == "patching"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_region_not_found(self, client):
+        request_data = {
+            "region": {
+                "name": "fake region"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.PRODUCER_URL, json=request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "wine": {
+                "description": "test validation fail"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.PRODUCER_URL, json=request_data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.PRODUCER_URL, json=self.request_data)
+        assert response.status_code == 401
 
 
 class TestGrapeCollection(object):
@@ -309,8 +486,7 @@ class TestGrapeCollection(object):
             assert "wines" in grape
 
     def test_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=self.request_data, headers=headers)
         assert response.status_code == 201
         body = json.loads(response.data)
@@ -319,14 +495,12 @@ class TestGrapeCollection(object):
         assert body["region"]["name"] == self.request_data["region"]["name"]
 
     def test_invalid_data_type_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, data={}, headers=headers)
         assert response.status_code == 415
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={"description": "test"}, headers=headers)
         assert response.status_code == 400
 
@@ -335,8 +509,7 @@ class TestGrapeCollection(object):
             "name": "test grape 1"
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=request_data, headers=headers)
         assert response.status_code == 409
 
@@ -347,10 +520,15 @@ class TestGrapeCollection(object):
 
 class TestGrapeItem(object):
 
-    RESOURCE_URL = "/api/grapes/test%20grape%201"
+    RESOURCE_URL = "/api/grapes"
+    GRAPE_URL = RESOURCE_URL + "/test%20grape%201"
+    FAKE_URL = RESOURCE_URL + "/test%20grape%206"
+    request_data = {
+        "description": "patching"
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.GRAPE_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
@@ -358,6 +536,64 @@ class TestGrapeItem(object):
         assert "description" in body
         assert "region" in body
         assert "wines" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.GRAPE_URL, headers=headers)
+        assert response.status_code == 200
+        grapes = _get_resource(client, self.RESOURCE_URL)
+        assert len(grapes) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.GRAPE_URL, json=self.request_data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.GRAPE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 200
+        grape = _get_resource(client, self.GRAPE_URL)
+        assert grape["description"] == "patching"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_region_not_found(self, client):
+        request_data = {
+            "region": {
+                "name": "fake region"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.GRAPE_URL, json=request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "region": {
+                "description": "test validation fail"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.GRAPE_URL, json=request_data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.GRAPE_URL, json=self.request_data)
+        assert response.status_code == 401
 
 
 class TestRegionCollection(object):
@@ -382,8 +618,7 @@ class TestRegionCollection(object):
             assert "grapes" in region
 
     def test_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=self.request_data, headers=headers)
         assert response.status_code == 201
         body = json.loads(response.data)
@@ -391,14 +626,12 @@ class TestRegionCollection(object):
         assert body["country"]["name"] == self.request_data["country"]["name"]
 
     def test_invalid_data_type_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, data={}, headers=headers)
         assert response.status_code == 415
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={"description": "test"}, headers=headers)
         assert response.status_code == 400
 
@@ -407,8 +640,7 @@ class TestRegionCollection(object):
             "name": "test region 1"
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=request_data, headers=headers)
         assert response.status_code == 409
 
@@ -419,10 +651,17 @@ class TestRegionCollection(object):
 
 class TestRegionItem(object):
 
-    RESOURCE_URL = "/api/regions/test%20region%201"
+    RESOURCE_URL = "/api/regions"
+    REGION_URL = RESOURCE_URL + "/test%20region%201"
+    FAKE_URL = RESOURCE_URL + "/test%20region%206"
+    request_data = {
+        "country": {
+            "name": "test country 1"
+        }
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.REGION_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
@@ -430,6 +669,64 @@ class TestRegionItem(object):
         assert "producers" in body
         assert "country" in body
         assert "grapes" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.REGION_URL, headers=headers)
+        assert response.status_code == 200
+        regions = _get_resource(client, self.RESOURCE_URL)
+        assert len(regions) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.REGION_URL, json=self.request_data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.REGION_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 200
+        region = _get_resource(client, self.REGION_URL)
+        assert region["country"]["name"] == "test country 1"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_country_not_found(self, client):
+        request_data = {
+            "country": {
+                "name": "fake region"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.REGION_URL, json=request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "region": {
+                "description": "test validation fail"
+            }
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.REGION_URL, json=request_data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.REGION_URL, json=self.request_data)
+        assert response.status_code == 401
 
 
 class TestCountryCollection(object):
@@ -449,22 +746,19 @@ class TestCountryCollection(object):
             assert "regions" in country
 
     def test_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=self.request_data, headers=headers)
         assert response.status_code == 201
         body = json.loads(response.data)
         assert body["name"] == self.request_data["name"]
 
     def test_invalid_data_type_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, data={}, headers=headers)
         assert response.status_code == 415
 
     def test_validation_error_post(self, client):
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json={"description": "test"}, headers=headers)
         assert response.status_code == 400
 
@@ -473,8 +767,7 @@ class TestCountryCollection(object):
             "name": "test country 1"
         }
 
-        token = _get_access_token(client)
-        headers = {'Authorization': token}
+        headers = _get_access_token_header(client)
         response = client.post(self.RESOURCE_URL, json=request_data, headers=headers)
         assert response.status_code == 409
 
@@ -485,12 +778,62 @@ class TestCountryCollection(object):
 
 class TestCountryItem(object):
 
-    RESOURCE_URL = "/api/countries/test%20country%201"
+    RESOURCE_URL = "/api/countries"
+    COUNTRY_URL = RESOURCE_URL + "/test%20country%201"
+    FAKE_URL = RESOURCE_URL + "/test%20country%206"
+    request_data = {
+        "name": "new name"
+    }
 
     def test_get(self, client):
-        response = client.get(self.RESOURCE_URL)
+        response = client.get(self.COUNTRY_URL)
         assert response.status_code == 200
         body = json.loads(response.data)
         assert body is not None
         assert "name" in body
         assert "regions" in body
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.COUNTRY_URL, headers=headers)
+        assert response.status_code == 200
+        countries = _get_resource(client, self.RESOURCE_URL)
+        assert len(countries) == 1
+
+    def test_not_found_on_deletion(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.COUNTRY_URL, json=self.request_data)
+        assert response.status_code == 401
+
+    def test_patch(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.COUNTRY_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 200
+        country = _get_resource(client, self.RESOURCE_URL + "/new%20name")
+        assert country["name"] == "new name"
+
+    def test_patch_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.patch(self.FAKE_URL, json=self.request_data, headers=headers)
+        assert response.status_code == 404
+
+    def test_patch_validation_error(self, client):
+        request_data = {
+            "description": "test validation fail"
+        }
+
+        headers = _get_access_token_header(client)
+        response = client.patch(self.COUNTRY_URL, json=request_data, headers=headers)
+        assert response.status_code == 400
+
+    def test_patch_no_auth(self, client):
+        response = client.patch(self.COUNTRY_URL, json=self.request_data)
+        assert response.status_code == 401
