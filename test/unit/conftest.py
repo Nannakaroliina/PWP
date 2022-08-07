@@ -3,6 +3,8 @@ import tempfile
 import pytest as pytest
 
 from flask import Flask
+from werkzeug.security import generate_password_hash
+
 from src.app import app
 from src.database import db
 from src.models.country import Country
@@ -15,6 +17,7 @@ from src.models.wine_type import Wine_type
 
 
 def _populate_db():
+    password = generate_password_hash("Test-password1234")
     for i in range(1, 4):
         wine_type = Wine_type(type='test type {}'.format(i))
         db.session.add(wine_type)
@@ -56,7 +59,7 @@ def _populate_db():
 
         user = User(
             username="test user {}".format(i),
-            password="Test-password1234",
+            password=password,
             email="testi@email.com",
             role="developer"
         )

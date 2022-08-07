@@ -25,7 +25,7 @@ class UserRegister(Resource):
             return err.messages, 400
 
         if User.find_by_name(user.username):
-            return {"[ERROR]": USER_ALREADY_EXISTS}, 400
+            return {"[ERROR]": USER_ALREADY_EXISTS}, 409
 
         user.password = generate_password_hash(user.password)
         user.add()
@@ -43,6 +43,7 @@ class UserItem(Resource):
         return user_schema.dump(user), 200
 
     @classmethod
+    @jwt_required()
     def delete(cls, username: str):
         user = User.find_by_name(username)
         if not user:
@@ -63,22 +64,21 @@ class UserLogin(Resource):
 
         user = User.find_by_name(user_data.username)
 
-        if not user:
+        if user:
+            if user and check_password_hash(user.password, user_data.password):
+                response = jsonify({"[INFO]": LOGIN_SUCCESSFUL})
+                access_token = create_access_token(identity=user.username)
+                set_access_cookies(response, access_token)
+                return 'Bearer ' + access_token, 200
+
+            return {"[ERROR]": INVALID_CREDENTIALS}, 401
+        else:
             return {"[ERROR]": USER_NOT_FOUND}, 404
-
-        if user and check_password_hash(user.password, user_data.password):
-            response = jsonify({"[INFO]": LOGIN_SUCCESSFUL})
-            access_token = create_access_token(identity=user.username)
-            set_access_cookies(response, access_token)
-            return 'Bearer ' + access_token, 200
-
-        return {"[ERROR]": INVALID_CREDENTIALS}, 401
 
 
 class UserLogout(Resource):
     @classmethod
     @jwt_required()
     def post(cls):
-        response = jsonify({"[INFO]": USER_LOGGED_OUT})
-        unset_jwt_cookies(response)
-        return response, 200
+        unset_jwt_cookies(jsonify({"[INFO]": USER_LOGGED_OUT}))
+        return {"[INFO]": USER_LOGGED_OUT}, 200

@@ -11,7 +11,8 @@ def _get_access_token_header(client):
 
     data = {
         "username": "tester",
-        "password": "Test-password1234"
+        "password": "Test-password1234",
+        "role": "developer"
     }
 
     client.post("/api/register", json=data)
@@ -836,4 +837,112 @@ class TestCountryItem(object):
 
     def test_patch_no_auth(self, client):
         response = client.patch(self.COUNTRY_URL, json=self.request_data)
+        assert response.status_code == 401
+
+
+class TestUserRegister(object):
+
+    RESOURCE_URL = "/api/register"
+    request_data = {
+        "username": "test",
+        "password": "test-passWord-1234",
+        "email": "test@email.com",
+        "role": "developer"
+    }
+
+    def test_post(self, client):
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 201
+        user = _get_resource(client, "/api/user/test")
+        assert user["username"] == "test"
+        assert user["email"] == "test@email.com"
+        assert user["role"] == "developer"
+
+    def test_post_validation_error(self, client):
+        self.request_data["password"] = "testi"
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 400
+
+    def test_post_user_exists(self, client):
+        self.request_data["username"] = "test user 2"
+        self.request_data["password"] = "test-passWord-1234"
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 409
+
+
+class TestUserItem(object):
+
+    RESOURCE_URL = "/api/user"
+    USER_URL = RESOURCE_URL + "/test%20user%201"
+    FAKE_URL = RESOURCE_URL + "/test%20user%206"
+
+    def test_get(self, client):
+        response = client.get(self.USER_URL)
+        assert response.status_code == 200
+        body = json.loads(response.data)
+        assert body["username"] == "test user 1"
+        assert body["email"] == "testi@email.com"
+        assert body["role"] == "developer"
+
+    def test_get_not_found(self, client):
+        response = client.get(self.FAKE_URL)
+        assert response.status_code == 404
+
+    def test_delete(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.USER_URL, headers=headers)
+        assert response.status_code == 200
+
+    def test_delete_not_found(self, client):
+        headers = _get_access_token_header(client)
+        response = client.delete(self.FAKE_URL, headers=headers)
+        assert response.status_code == 404
+
+    def test_delete_no_auth(self, client):
+        response = client.delete(self.RESOURCE_URL + "/test%20user%202")
+        assert response.status_code == 401
+
+
+class TestUserLogin(object):
+
+    RESOURCE_URL = "/api/login"
+    request_data = {
+        "username": "test user 2",
+        "password": "Test-password1234"
+    }
+
+    def test_post(self, client):
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 200
+        body = json.loads(response.data)
+        assert "Bearer" in body
+
+    def test_post_not_found(self, client):
+        self.request_data["username"] = "fake user"
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 404
+
+    def test_post_validation_error(self, client):
+        self.request_data["password"] = "testi"
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 400
+
+    def test_post_invalid_credentials(self, client):
+        self.request_data["username"] = "test user 2"
+        self.request_data["password"] = "Test-password1234123"
+        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        assert response.status_code == 401
+
+
+class TestUserLogout(object):
+
+    RESOURCE_URL = "/api/logout"
+
+    def test_post(self, client):
+        headers = _get_access_token_header(client)
+        response = client.post(self.RESOURCE_URL, headers=headers)
+        assert response.status_code == 200
+
+    def test_post_no_auth(self, client):
+        response = client.post(self.RESOURCE_URL)
         assert response.status_code == 401
