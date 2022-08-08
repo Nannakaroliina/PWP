@@ -10,3 +10,4 @@ flask-jwt-extended
 pytest
 pytest-cov
 requests
+gunicorn

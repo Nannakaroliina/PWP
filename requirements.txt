@@ -41,6 +41,8 @@ flask-sqlalchemy==2.5.1
     # via -r requirements.in
 greenlet==1.1.2
     # via sqlalchemy
+gunicorn==20.1.0
+    # via -r requirements.in
 idna==3.3
     # via requests
 iniconfig==1.1.1
@@ -116,3 +118,6 @@ werkzeug==2.2.1
     # via
     #   flask
     #   flask-jwt-extended
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
