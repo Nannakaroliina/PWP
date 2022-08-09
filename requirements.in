@@ -11,3 +11,7 @@ pytest
 pytest-cov
 requests
 gunicorn
+psycopg2
+alembic
+Flask-Migrate
+Flask-Script
