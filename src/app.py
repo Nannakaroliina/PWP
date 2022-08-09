@@ -2,6 +2,7 @@ import click
 from flask import Flask, render_template
 from flask.cli import with_appcontext
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from flask_restful import Api
 
 from src.database import db
@@ -25,6 +26,7 @@ app.config.from_object('config.Config')
 jwt = JWTManager(app)
 db.init_app(app)
 api = Api(app)
+migrate = Migrate(app, db)
 
 
 @app.route("/")
