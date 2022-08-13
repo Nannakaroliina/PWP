@@ -1,3 +1,7 @@
+"""
+Module for producer resource. Provides the methods to get, post, patch and delete
+data related to producer. Some methods are jwt restricted.
+"""
 from sqlite3 import IntegrityError, InternalError
 
 from flask import request
@@ -16,14 +20,37 @@ producer_list_schema = ProducerSchema(many=True)
 
 # noinspection DuplicatedCode
 class ProducerList(Resource):
-    
+    """
+       Class that provides the methods to get producers and post new producers.
+    """
     @classmethod
     def get(cls):
+        """
+        Get a list of producers from database
+        :return: List of producers
+        """
         return {"producers": producer_list_schema.dump(Producer.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new producer to database, takes a json from request
+        which is used to create new Producer object to add to db.
+
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "producer",
+            "description": "Optional description",
+            "region" {  # Optional
+                "name": "region"
+            }
+        }
+
+        :return: Serialized Producer object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
         
@@ -54,10 +81,18 @@ class ProducerList(Resource):
         return producer_schema.dump(producer), 201
 
 
+# noinspection DuplicatedCode
 class ProducerItem(Resource):
-
+    """
+    Class that provides the methods to get, delete and patch producer.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific producer from database with given name
+        :param name: string name for producer
+        :return: Serialized Producer object as a JSON
+        """
         db_producer = Producer.find_by_name(name)
         if db_producer is not None:
             return producer_schema.dump(db_producer), 200
@@ -67,7 +102,13 @@ class ProducerItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific producer from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for producer
+        :return: string info
+        """
         item = Producer.find_by_name(name)
 
         if item:
@@ -82,6 +123,24 @@ class ProducerItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing producer in the database by given name.
+        Takes a json data from request.
+
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "producer",
+            "description": "Optional description",
+            "region" {  # Optional
+                "name": "region"
+            }
+        }
+
+        :param name: string name of the producer
+        :return: Serialized Producer object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 

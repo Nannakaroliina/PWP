@@ -1,3 +1,7 @@
+"""
+Module for grape resource. Provides the methods to get, post, patch and delete
+data related to grape. Some methods are jwt restricted.
+"""
 from sqlite3 import IntegrityError, InternalError
 
 from flask import request
@@ -16,15 +20,37 @@ grape_list_schema = GrapeSchema(many=True)
 
 # noinspection DuplicatedCode
 class GrapeList(Resource):
-
+    """
+       Class that provides the methods to get grapes and post new grape.
+    """
     @classmethod
     def get(cls):
+        """
+        Get a list of grapes from database
+        :return: List of grapes
+        """
         return {"grapes": grape_list_schema.dump(Grape.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new grape to database, takes a json from request
+        which is used to create new Grape object to add to db
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "grape",
+            "description": "Optional description",
+            "region" {  # Optional
+                "name": "region"
+            }
+        }
+
+        :return: Serialized Grape object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
@@ -56,9 +82,16 @@ class GrapeList(Resource):
 
 
 class GrapeItem(Resource):
-
+    """
+    Class that provides the methods to get, delete and patch grape.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific grape from database with given name
+        :param name: string name for grape
+        :return: Serialized Grape object as a JSON
+        """
         db_grape = Grape.find_by_name(name)
         if db_grape is not None:
             return grape_schema.dump(db_grape), 200
@@ -68,7 +101,13 @@ class GrapeItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific grape from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for grape
+        :return: string info
+        """
         item = Grape.find_by_name(name)
 
         if item:
@@ -83,7 +122,24 @@ class GrapeItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing grape in the database by given name.
+        Takes a json data from request.
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "grape",
+            "description": "Optional description",
+            "region" {  # Optional
+                "name": "region"
+            }
+        }
+
+        :param name: string name of the grape
+        :return: Serialized Grape object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 

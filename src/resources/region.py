@@ -1,3 +1,7 @@
+"""
+Module for region resource. Provides the methods to get, post, patch and delete
+data related to region. Some methods are jwt restricted.
+"""
 from sqlite3 import IntegrityError, InternalError
 from urllib import request
 
@@ -18,15 +22,36 @@ region_list_schema = RegionSchema(many=True)
 
 # noinspection DuplicatedCode
 class RegionList(Resource):
+    """
+    Class that provides the methods to get regions and post new regions.
+    """
     @classmethod
     def get(cls):
-        
+        """
+        Get a list of regions from database
+        :return: List of regions
+        """
         return {"regions": region_list_schema.dump(Region.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new region to database, takes a json from request
+        which is used to create new Region object to add to db
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "region",
+            "country" {  # Optional
+                "name": "country"
+            }
+        }
+
+        :return: Serialized Region object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
@@ -58,9 +83,16 @@ class RegionList(Resource):
 
     
 class RegionItem(Resource):
-
+    """
+    Class that provides the methods to get, delete and patch region.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific region from database with given name
+        :param name: string name for region
+        :return: Serialized Region object as a JSON
+        """
         db_region = Region.find_by_name(name)
         if db_region is not None:
             return region_schema.dump(db_region), 200
@@ -70,7 +102,13 @@ class RegionItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific region from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for region
+        :return: string info
+        """
         item = Region.find_by_name(name)
 
         if item:
@@ -85,7 +123,24 @@ class RegionItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing region in the database by given name.
+        Takes a json data from request.
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "name": "producer",
+            "description": "Optional description",
+            "region" {  # Optional
+                "name": "region"
+            }
+        }
+
+        :param name: string name of the region
+        :return: Serialized Region object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 

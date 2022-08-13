@@ -1,3 +1,7 @@
+"""
+Module for wine type resource. Provides the methods to get, post, patch and delete
+data related to wine type. Some methods are jwt restricted.
+"""
 from sqlite3 import IntegrityError, InternalError
 
 from flask_jwt_extended import jwt_required
@@ -15,19 +19,39 @@ wine_type_list_schema = WineTypeSchema(many=True)
 
 # noinspection DuplicatedCode
 class Wine_typeList(Resource):
+    """
+    Class that provides the methods to get wine types and post new wine types.
+    """
     @classmethod
     def get(cls):
+        """
+        Get a list of wine types from database
+        :return: List of wine types
+        """
         return {"wine_types": wine_type_list_schema.dump(Wine_type.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new wine type to database, takes a json from request
+        which is used to create new Wine_type object to add to db
+
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "type": "wine type"
+        }
+
+        :return: Serialized Wine_type object as a JSON
+        """
         if not request.json:
             return {"[INFO]": NOT_JSON}, 415
 
         json_item = request.get_json()
 
-        # try to validate the winetype
+        # try to validate the wine type
         try:
             item = wine_type_schema.load(json_item)
         except ValidationError as err:
@@ -37,7 +61,7 @@ class Wine_typeList(Resource):
         if Wine_type.find_by_type(request.json["type"]):
             return {"[INFO]": "Wine type already exits"}, 409
 
-        # try add new type to db
+        # try to add new type to db
         try:
             item.add()
         except IntegrityError:
@@ -47,8 +71,16 @@ class Wine_typeList(Resource):
 
 
 class Wine_typeItem(Resource):
+    """
+    Class that provides the methods to get, delete and patch wine type.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific wine type from database with given name
+        :param name: string name for wine type
+        :return: Serialized Wine_type object as a JSON
+        """
         db_wine_type = Wine_type.find_by_type(name)
         if db_wine_type is not None:
             return wine_type_schema.dump(db_wine_type), 200
@@ -58,7 +90,13 @@ class Wine_typeItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific wine type from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for wine type
+        :return: string info
+        """
         item = Wine_type.find_by_type(name)
 
         if item:
@@ -73,7 +111,19 @@ class Wine_typeItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing wine type in the database by given name.
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example, doesn't require all fields:
+        {
+            "type": "wine type"
+        }
+
+        :param name: string name of the wine type
+        :return: Serialized Wine_type object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 

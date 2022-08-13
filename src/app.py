@@ -1,6 +1,12 @@
+"""
+Module that contains the logic for building the app and api
+"""
+import os
+
 import click
 from flask import Flask, render_template
 from flask.cli import with_appcontext
+from flask_bootstrap import Bootstrap
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_restful import Api
@@ -22,27 +28,39 @@ from src.resources.wine import WineItem, WineList
 from src.resources.wine_type import Wine_typeItem, Wine_typeList
 
 app = Flask(__name__)
-app.config.from_object('config.Config')
+env_config = os.getenv("APP_SETTINGS", "config.Config")
+app.config.from_object(env_config)
 jwt = JWTManager(app)
 db.init_app(app)
 api = Api(app)
 migrate = Migrate(app, db)
+Bootstrap(app)
 
 
 @app.route("/")
 def hello_world():
-    return render_template('index.html')
+    """
+    Render the index page for the app
+    :return: template for web app
+    """
+    return render_template("index.html")
 
 
 @click.command("create-tables")
 @with_appcontext
 def create_tables_cmd():
+    """
+    Create all the tables for the database
+    """
     db.create_all()
 
 
 @click.command("delete-tables")
 @with_appcontext
 def delete_tables_cmd():
+    """
+    Delete all the data from database
+    """
     db.drop_all()
 
 
@@ -81,9 +99,9 @@ def populate_database_cmd():
     tenuta_sette_ponti.region = tuscany
     tenuta_sette_ponti.add()
 
-    chateau_du_poyet = Producer(name='Château du Poyet',
-                                description='Château du Poyet is well regarded estate producing Muscadet '
-                                            'Sèvre-et-Maine from around 43 hectares in the village of Chapelle '
+    chateau_du_poyet = Producer(name='Chateau du Poyet',
+                                description='Chateau du Poyet is well regarded estate producing Muscadet '
+                                            'Savre-et-Maine from around 43 hectares in the village of Chapelle '
                                             'Heulin. It is owned by the Bonneau family.')
     chateau_du_poyet.region = loire_valley
     chateau_du_poyet.add()
@@ -146,10 +164,10 @@ def populate_database_cmd():
     crognolo_toscana.add()
 
     muscadet_picture = get_file_url('chateau-de-poyet-muscadet-sevre-et-maine-sur-lie.png')
-    muscadet = Wine(name='Muscadet Sèvre et Maine Sur Lie', year_produced=2018, alcohol_percentage=14.5, volume=750,
+    muscadet = Wine(name='Muscadet Sevre et Maine Sur Lie', year_produced=2018, alcohol_percentage=14.5, volume=750,
                     picture=muscadet_picture,
                     description='A nice crisp drink. Pale in colour with a nice "tang" on the mouth. Absolutely '
-                                'quaffable. As all Muscadet Sèvre et Maine sur Lie, Château du Poyet keeps its wine '
+                                'quaffable. As all Muscadet Sevre et Maine sur Lie, Chateau du Poyet keeps its wine '
                                 'on lees all over the winter and cannot bottle them before the 3rd Thursday of March. '
                                 'The whole process allows this wine a lovely freshness.',
                     style='Green and Flinty')

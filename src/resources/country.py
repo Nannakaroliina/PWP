@@ -1,3 +1,7 @@
+"""
+Module for country resource. Provides the methods to get, post, patch and delete
+data related to country. Some methods are jwt restricted.
+"""
 from sqlite3 import IntegrityError, InternalError
 
 from flask import request
@@ -15,15 +19,33 @@ country_list_schema = CountrySchema(many=True)
 
 # noinspection DuplicatedCode
 class CountryList(Resource):
-
+    """
+    Class that provides the methods to get countries and post new countries.
+    """
     @classmethod
     def get(cls):
+        """
+        Get a list of countries from database
+        :return: List of countries
+        """
         return {"countries": country_list_schema.dump(Country.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new country to database, takes a json from request
+        which is used to create new Country object to add to db
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example:
+        {
+            "name": "country"
+        }
+
+        :return: Serialized Country object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 
@@ -46,9 +68,16 @@ class CountryList(Resource):
 
 
 class CountryItem(Resource):
-
+    """
+    Class that provides the methods to get, delete and patch country.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific country from database with given name
+        :param name: string name for country
+        :return: Serialized Country object as a JSON
+        """
         db_country = Country.find_by_name(name)
         if db_country is not None:
             return country_schema.dump(db_country), 200
@@ -58,7 +87,13 @@ class CountryItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific country from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for country
+        :return: string info
+        """
         item = Country.find_by_name(name)
 
         if item:
@@ -73,7 +108,19 @@ class CountryItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing country in the database by given name.
 
+        Headers: Authorization: Bearer access token
+        Request content-type: Application/JSON
+        Request body example:
+        {
+            "type": "wine type"
+        }
+
+        :param name: string name of the wine type
+        :return: Serialized Country object as a JSON
+        """
         if not request.is_json:
             return {"[ERROR]": NOT_JSON}, 415
 

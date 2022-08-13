@@ -1,3 +1,6 @@
+"""
+Module for database testing.
+"""
 import pytest
 from sqlalchemy.exc import IntegrityError
 
@@ -8,7 +11,7 @@ from src.models.region import Region
 from src.models.user import User
 from src.models.wine import Wine
 from src.models.wine_type import Wine_type
-from test.unit.conftest import db_handle
+from test.conftest import db_handle  # pylint: disable=unused-import
 
 
 def _get_wine_type():
@@ -438,4 +441,3 @@ def test_user_required_columns(db_handle):
     db_handle.session.add(user)
     with pytest.raises(IntegrityError):
         db_handle.session.commit()
-

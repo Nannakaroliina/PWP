@@ -1,10 +1,14 @@
+"""
+Module for wine resource. Provides the methods to get, post, patch and delete
+data related to wine. Some methods are jwt restricted.
+"""
 import json
 from sqlite3 import IntegrityError, InternalError
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from flask import request
 from marshmallow import ValidationError
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest
 
 from src.libs.helpers import check_file_and_proper_naming, upload_file
 from src.models.wine import Wine
@@ -23,14 +27,50 @@ wine_list_schema = WineSchema(many=True)
 
 
 class WineList(Resource):
-
+    """
+    Class that provides the methods to get wines and post new wines.
+    """
     @classmethod
     def get(cls):
+        """
+        Get a list of wines from database
+        :return: List of wines
+        """
         return {"wines": wine_list_schema.dump(Wine.find_all())}, 200
 
     @classmethod
     @jwt_required()
     def post(cls):
+        """
+        Post a new wine to database, takes a form and file from request
+        which is used to create new Wine object to add to db.
+
+        Headers: Authorization: Bearer access token
+        Request content-type: Multipart/form
+        Request body example, doesn't require all fields:
+        {
+            "file": jpg file
+            "data": application/json {
+                "name": "wine",
+                "description": "Optional description",
+                "style": "Optional style for wine, eg. dry"
+                "year_produced": 2000,  # Optional
+                "alcohol_percentage": 15,  # Optional
+                "volume": 750,  # Optional
+                "grape": {  # Optional
+                    "name": "grape"
+                },
+                "wine_type": {  # Optional
+                    "type": "red"
+                },
+                "producer": {
+                    "name": "producer"
+                }
+            }
+        }
+
+        :return: Serialized Wine object as a JSON
+        """
         file = request.files.get('file')
         try:
             content = json.loads(request.form.get('data'))
@@ -86,9 +126,16 @@ class WineList(Resource):
 
 
 class WineItem(Resource):
-
+    """
+    Class that provides the methods to get, delete and patch wine.
+    """
     @classmethod
     def get(cls, name):
+        """
+        Get one specific wine from database with given name
+        :param name: string name for wine
+        :return: Serialized Wine object as a JSON
+        """
         db_wine = Wine.find_by_name(name)
         if db_wine is not None:
             return wine_schema.dump(db_wine), 200
@@ -98,7 +145,13 @@ class WineItem(Resource):
     @classmethod
     @jwt_required()
     def delete(cls, name):
+        """
+        Delete one specific wine from database with given name
+        Headers: Authorization: Bearer access token
 
+        :param name: string name for wine
+        :return: string info
+        """
         item = Wine.find_by_name(name)
         if item:
             try:
@@ -112,6 +165,37 @@ class WineItem(Resource):
     @classmethod
     @jwt_required()
     def patch(cls, name):
+        """
+        Update the existing wine in the database by given name.
+        Takes a file and/or form data from request.
+
+        Headers: Authorization: Bearer access token
+        Request content-type: Multipart/form
+        Request body example, doesn't require all fields:
+        {
+            "file": jpg file
+            "data": application/json {
+                "name": "wine",
+                "description": "Optional description",
+                "style": "Optional style for wine, eg. dry"
+                "year_produced": 2000,  # Optional
+                "alcohol_percentage": 15,  # Optional
+                "volume": 750,  # Optional
+                "grape": {  # Optional
+                    "name": "grape"
+                },
+                "wine_type": {  # Optional
+                    "type": "red"
+                },
+                "producer": {
+                    "name": "producer"
+                }
+            }
+        }
+
+        :param name: string name of the wine
+        :return: Serialized Wine object as a JSON
+        """
         file = request.files.get('file')
         try:
             content = json.loads(request.form.get('data'))

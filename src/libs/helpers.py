@@ -1,3 +1,6 @@
+"""
+This module is a lib class to provide some helper class for image handling.
+"""
 import logging
 import os
 import re
@@ -25,6 +28,12 @@ def check_file_and_proper_naming(file: Union[str, FileStorage]) -> bool:
 
 
 def upload_file(file: Union[str, FileStorage]):
+    """
+    Helper method to upload the file to S3 bucket using
+    AWSBucket create_presigned_post method
+    :param file: file to be posted
+    :return: file url
+    """
     key = file.filename
 
     # check if file doesn't exist and create temp file under static folder
@@ -57,8 +66,17 @@ def upload_file(file: Union[str, FileStorage]):
 
 
 def get_file_url(filename: str):
+    """
+    Helper method to get file url for S3 Bucket
+    :param filename: string name of the file
+    :return: File url
+    """
     return s3.get_file_url(file_name=filename)
 
 
 def get_all_file_urls():
+    """
+    Helper method to get all file urls for S3 Bucket
+    :return: List of file urls
+    """
     return s3.get_file_urls()

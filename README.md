@@ -17,7 +17,8 @@ source pwp/bin/activate
 
 ## Required dependencies
 
-To keep all requirements and pinned requirements up-to-date
+The project is using Python 3.10.
+To keep all requirements and pinned requirements up-to-date,
 this project uses pip-tools and requirements.in file to provide 
 all needed dependencies which needs to be installed:
 
@@ -31,6 +32,10 @@ all needed dependencies which needs to be installed:
 - flask-jwt-extended for JSON Web Token based authentication
 - pytest for testing
 - pytest-cov for coverage report
+- requests lib to make aws post calls
+- gunicorn for WSGI HTTP Server (project is deployed in heroku)
+- alembic & Flask-Migrate for database migration (deployment version uses postgresql db instead of sqlite3)
+- flask-bootstrap for building the web app client for starting page
 
 
 ### Install pip-tools for package management
@@ -46,7 +51,7 @@ contains all needed dependencies and this is used for
 pip-sync command which makes sure all the dependencies are installed.
 
 ```shell
-pip-compile ./requirements.in
+pip-compile
 ```
 
 or upgrade
@@ -59,6 +64,16 @@ pip-compile --upgrade-package <package>
 ```shell
 pip-sync
 ```
+
+## Deployed project
+
+The deployed project can be found from:
+[Wine Time API & client](https://wine-time-api.herokuapp.com)
+
+For api end-points, use /api/<end-point> option,
+e.g. api/wines to get all wines
+
+Note! Since the project is using S3 Bucket with presigned urls, the picture urls expire within a week.
 
 ## Project runnable
 
@@ -85,7 +100,7 @@ After use, you can delete database if you wish:
 ## Running tests
 
 The test are done with pytest, it provides the results of the tests,
-including the warnings if there is any. Finally it gives coverage report.
+including the warnings if there is any. Finally, it gives coverage report.
 To run them let's first make script files runnable:
 
 ```shell

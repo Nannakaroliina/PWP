@@ -1,7 +1,11 @@
+"""
+Module for API testing
+"""
 import json
+from copy import deepcopy
 
 from src.schemas.schemas import WineSchema
-from test.unit.conftest import client
+from test.conftest import client  # pylint: disable=unused-import
 
 wine_schema = WineSchema()
 wine_list_schema = WineSchema(many=True)
@@ -31,7 +35,7 @@ def test_homepage(client):
     homepage = response.data.decode()
 
     assert response.status_code == 200
-    assert "Hello, world!" in homepage
+    assert "Welcome to Wine Time" in homepage
 
 
 class TestWineCollection(object):
@@ -859,14 +863,15 @@ class TestUserRegister(object):
         assert user["role"] == "developer"
 
     def test_post_validation_error(self, client):
-        self.request_data["password"] = "testi"
-        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        copy = deepcopy(self.request_data)
+        copy["password"] = "testi"
+        response = client.post(self.RESOURCE_URL, json=copy)
         assert response.status_code == 400
 
     def test_post_user_exists(self, client):
-        self.request_data["username"] = "test user 2"
-        self.request_data["password"] = "test-passWord-1234"
-        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        copy = deepcopy(self.request_data)
+        copy["username"] = "test user 2"
+        response = client.post(self.RESOURCE_URL, json=copy)
         assert response.status_code == 409
 
 
@@ -918,19 +923,22 @@ class TestUserLogin(object):
         assert "Bearer" in body
 
     def test_post_not_found(self, client):
-        self.request_data["username"] = "fake user"
-        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        copy = deepcopy(self.request_data)
+        copy["username"] = "fake user"
+        response = client.post(self.RESOURCE_URL, json=copy)
         assert response.status_code == 404
 
     def test_post_validation_error(self, client):
-        self.request_data["password"] = "testi"
-        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        copy = deepcopy(self.request_data)
+        copy["password"] = "testi"
+        response = client.post(self.RESOURCE_URL, json=copy)
         assert response.status_code == 400
 
     def test_post_invalid_credentials(self, client):
-        self.request_data["username"] = "test user 2"
-        self.request_data["password"] = "Test-password1234123"
-        response = client.post(self.RESOURCE_URL, json=self.request_data)
+        copy = deepcopy(self.request_data)
+        copy["username"] = "test user 2"
+        copy["password"] = "Test-password1234123"
+        response = client.post(self.RESOURCE_URL, json=copy)
         assert response.status_code == 401
 
 
