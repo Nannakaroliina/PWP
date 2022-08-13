@@ -28,6 +28,7 @@ components:
       required:
         - username
         - password
+        
     Wine_type:
       type: object
       properties:
@@ -41,7 +42,6 @@ components:
       type: object
       properties:
         name:
-          description: The unique name of a wine
           type: string
         wine_type: 
           $ref: '#/components/schemas/Wine_type'
@@ -62,7 +62,6 @@ components:
         picture:
           description: reference to the picture storage
           type: string
-
         description:
           description: Description of wine and its attributes
           type: string
@@ -70,6 +69,7 @@ components:
           $ref: '#/components/schemas/Grape'
       required:
         - name
+        
     Grape:
       type: object
       properties:
@@ -122,7 +122,7 @@ components:
     NotFound:
       description: requested item not found from the database
     Conflict:
-      description: an item too similair already exists
+      description: item already exists
     UnsupportedMediaType:
       description: media type something other than application/json
     ServerError:
@@ -210,44 +210,6 @@ components:
       description: wine object with only a name
       value:
         name: wine-1
-    styled-wine-example:
-      description: wine with required name + style
-      value:
-        name: wine-2
-        style: savory
-    graped-wine-example:
-      description: wine with name + grape
-      value:
-        name: wine-3
-        grape:
-          name: grape-1
-    produced-wine-example:
-      description: wine with name + producer
-      value:
-        name: wine-4
-        producer:
-          name: producer-1
-    alcohol-wine-example:
-      description: wine with name + alcohol percentage
-      value:
-        name: wine-5
-        alcohol_percentage: 12.2
-    typed-wine-example:
-      description: wine with name + wine type
-      value:
-        name: wine-6
-        wine_type:
-          type: red
-    pictured-wine-example:
-      description: wine with name + picture
-      value:
-        name: wine-7
-        picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
-    dated-wine-example:
-      description: wine with name + producuction year
-      value:
-        name: wine-8
-        year_produced: 2012
     complex-wine-example:
       description: complext wine object
       value:
@@ -438,21 +400,75 @@ components:
           regions:
             - name: Tuscany
             - name: Sicily
-            
-  securitySchemes:
-
-security:
 
 paths:
   /login:
     post:
+      summary: attempts to login user
+      responses:  
+        '200':
+          description: User logged in successfully, returns access token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: invalid credentials
+        '404':
+          $ref: '#/components/responses/NotFound'
   /logout:
     post:
+      summary: logs out user
+      responses:
+        '200':
+          description: user logged out successfully
   /register:
     post:
+      summary: attempts to create a new user
+      requestBody:
+        description: JSON with necessary info for new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+                username: Johnny-boy
+                password: password
+                email: johnny.james@mail.com
+                role: developer
+      responses:
+        '201':
+          description: user created successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: username already taken
+          
   /user/{username}:
+    parameters:
+    - $ref: '#/components/parameters/username'
     get:
-		delete:
+      summary: returns user with specified username
+      responses:
+        '200':
+          description: return retrieved user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                username: Johnny-boy
+                email: johnny.james@mail.com
+                role: developer
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: delete specified user
+      responses: 
+        '200':
+          description: deleted successfully, return info
+        '404':
+          $ref: '#/components/responses/NotFound'
+      
+    
   /wine_types:
     get:
       summary: Returns a list of all countries in database
