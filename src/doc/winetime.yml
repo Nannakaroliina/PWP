@@ -1,0 +1,1130 @@
+---
+
+openapi: 3.0.3
+info:
+  title: Winetime Documentation
+  version: 0.0.1
+  description: |
+    This is a course project for the Programmangle Web Project course. 
+    The API stores data about wine and its attributes, such as grapes, producers and production regions.
+servers:
+- url: /api
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          description: user's unique identifier
+          type: string
+        password:
+          description: user's validation code
+          type: string
+        email:
+          description: an address for contacting user
+          type: string
+        role:
+          description: defines which endpoints to access
+      required:
+        - username
+        - password
+    Wine_type:
+      type: object
+      properties:
+        type:
+          description: The general type of wine
+          type: string
+      required:
+      - type
+
+    Wine:
+      type: object
+      properties:
+        name:
+          description: The unique name of a wine
+          type: string
+        wine_type: 
+          $ref: '#/components/schemas/Wine_type'
+        style:
+          description: Describes e.g., taste or feel of wine
+          type: string
+        producer:
+          $ref: '#/components/schemas/Producer'
+        year_produced:
+          description: The year wine production has taken place
+          type: integer
+        alcohol_percentage:
+          description: How many percent of alcohol wine contains
+          type: number
+        volume:
+          description: How much wine one bottle cointains
+          type: integer
+        picture:
+          description: reference to the picture storage
+          type: string
+
+        description:
+          description: Description of wine and its attributes
+          type: string
+        grape:
+          $ref: '#/components/schemas/Grape'
+      required:
+        - name
+    Grape:
+      type: object
+      properties:
+        name:
+          type: string
+        region:
+          $ref: '#/components/schemas/Region'
+        description:
+          type: string
+      required:
+        - name
+    Producer:
+      description: a winery producing wine
+      type: object
+      properties:
+        name: 
+          type: string
+        region:
+          $ref: '#/components/schemas/Region'
+        description:
+          type: string
+      required:
+        - name
+    Region:
+      description: general geographical area where something is located
+      type: object
+      properties:
+        name: 
+          type: string
+        country:
+          $ref: '#/components/schemas/Country'
+      required:
+        - name
+    Country: 
+      description: wider geographical area where region is located
+      type: object
+      properties:
+        name: 
+          type: string
+        regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Region'
+      required:
+        - name
+        
+  responses:
+    BadRequest:
+      description: faulty json request
+    NotFound:
+      description: requested item not found from the database
+    Conflict:
+      description: an item too similair already exists
+    UnsupportedMediaType:
+      description: media type something other than application/json
+    ServerError:
+      description: internal server error occured
+    
+  parameters:
+    username:
+      name: username
+      in: path
+      description: User's unique identifier
+      required: true
+      schema:
+        type: string
+    wine_type:
+      name: wine_type
+      in: path
+      description: Unique name of a wine type
+      required: true
+      schema:
+        type: string
+    wine: 
+      name: wine
+      in: path
+      description: Unique name of a wine
+      required: true
+      schema:
+        type: string
+    grape:
+      name: grape
+      in: path
+      description: Unique name of a grape
+      required: true
+      schema:
+        type: string
+    producer:
+      name: producer
+      in: path
+      description: Unique name of a producer
+      required: true
+      schema:
+        type: string
+    region:
+      name: region
+      in: path
+      description: Unique name of a producer
+      required: true
+      schema:
+        type: string
+    country:
+      name: country
+      in: path
+      description: Unique name of a country
+      required: true
+      schema:
+        type: string
+
+  examples:
+    simple-wine-type-example:
+      description: wine type object with only the name
+      value: 
+        name: red
+    complex-wine-type-example:
+      description: wine type object with list of associated wines
+      value:
+        name: red
+        wines:
+          - name: wine-1
+          - name: wine-2
+    simple-wine-type-list:
+      description: simple wine type list
+      value:
+        - name: type-1
+        - name: type-2
+    complex-wine-type-list:
+      description: complex wine type list
+      value:
+        - name: type-1
+          wines:
+            $ref: '#/components/examples/simple-wine-list'
+        - name: type-2
+          wines:
+            $ref: '#/components/examples/simple-wine-list'        
+          
+    simple-wine-example:
+      description: wine object with only a name
+      value:
+        name: wine-1
+    styled-wine-example:
+      description: wine with required name + style
+      value:
+        name: wine-2
+        style: savory
+    graped-wine-example:
+      description: wine with name + grape
+      value:
+        name: wine-3
+        grape:
+          name: grape-1
+    produced-wine-example:
+      description: wine with name + producer
+      value:
+        name: wine-4
+        producer:
+          name: producer-1
+    alcohol-wine-example:
+      description: wine with name + alcohol percentage
+      value:
+        name: wine-5
+        alcohol_percentage: 12.2
+    typed-wine-example:
+      description: wine with name + wine type
+      value:
+        name: wine-6
+        wine_type:
+          type: red
+    pictured-wine-example:
+      description: wine with name + picture
+      value:
+        name: wine-7
+        picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+    dated-wine-example:
+      description: wine with name + producuction year
+      value:
+        name: wine-8
+        year_produced: 2012
+    complex-wine-example:
+      description: complext wine object
+      value:
+        name: wine-1
+        style: sparkling
+        wine_type:
+          type: red
+        producer:
+          $ref: '#/components/examples/simple-producer-example'
+        year_produced: 1912
+        alcohol_percentage: 22.5
+        volume: 700
+        picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+        description: a wonderful, warming wine
+        grape: 
+          $ref: '#/components/examples/simple-grape-example'
+        
+    simple-wine-list:
+      description: simple wine object list
+      value:
+        - name: wine-1
+        - name: wine-2
+    complex-wine-list:
+      description: complext wine object list
+      value:
+        - name: wine-1
+          style: sparkling
+          wine_type:
+            type: red
+          producer:
+            $ref: '#/components/examples/simple-producer-example'
+          year_produced: 1912
+          alcohol_percentage: 22.5
+          volume: 700
+          picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+          description: a wonderful, warming wine
+          grape: 
+            $ref: '#/components/examples/simple-grape-example'
+        - name: wine-2
+          style: sizzling
+          wine_type:
+            type: white
+          producer:
+            $ref: '#/components/examples/simple-producer-example'
+          year_produced: 1999
+          alcohol_percentage: 10.5
+          volume: 500
+          picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+          description: a curious, cooling wine
+          grape: 
+            $ref: '#/components/examples/simple-grape-example'
+
+    simple-grape-example:
+      description: simple grape object
+      value:
+        name: grape-1
+    complex-grape-example:
+      value:
+        name: grape-1
+        description: hi i am a grape
+        region:
+          $ref: '#/components/examples/simple-region-example'
+        producers:
+          $ref: '#/components/examples/simple-producer-list'
+        wines:
+          $ref: '#/components/examples/simple-wine-list'
+    simple-grape-list:
+      description: simple grape object list
+      value:
+        - name: grape-1
+        - name: grape-2
+    complex-grape-list:
+      description: complex grape object list
+      value:
+        - name: grape-1
+          description: soft and sweet
+          region:
+            $ref: '#/components/examples/simple-region-example'
+          producers:
+            $ref: '#/components/examples/simple-producer-list'
+          wines:
+            $ref: '#/components/examples/simple-wine-list'
+        - name: grape-2
+          description: nice and crispy and green
+          region:
+            $ref: '#/components/examples/simple-region-example'
+          producers:
+            $ref: '#/components/examples/simple-producer-list'
+          wines:
+            $ref: '#/components/examples/simple-wine-list'
+
+    simple-producer-example:
+      description: simple producer object
+      value:
+        name: producer-1
+    complex-producer-example:
+      description: complex producer object
+      value:
+        name: producer-1
+        region:
+          $ref: '#/components/examples/simple-region-example'
+        description: hi we make wine
+        wines:
+          $ref: '#/components/examples/simple-wine-list' 
+    simple-producer-list:
+      description: simple producer list
+      value: 
+        - name: producer-1
+        - name: producer-2
+    complex-producer-list:
+      description: complex producer list
+      value:
+        - name: producer-1
+          region:
+            $ref: '#/components/examples/simple-region-example'
+          description: hi we make wine
+          wines:
+            $ref: '#/components/examples/simple-wine-list' 
+        - name: producer-2
+          region:
+            $ref: '#/components/examples/simple-region-example'
+          description: we also make wine
+          wines:
+            $ref: '#/components/examples/simple-wine-list' 
+        
+    simple-region-example:
+      description: simple region object
+      value:
+        name: Tuscany
+    complex-region-example:
+      description: complex region object
+      value:
+        name: Tuscany
+        country:
+          name: Italy
+        producers:
+          $ref: '#/components/examples/simple-producer-list'
+        grapes:
+          $ref: '#/components/examples/simple-grape-list'
+    simple-region-list:
+      description: simple region list
+      value:
+        - name: Tuscany
+        - name: Sicily
+    complex-region-list:
+      description: complex region list
+      value:
+        - name: Tuscany
+          country:
+            name: Italy
+          producers:
+            $ref: '#/components/examples/simple-producer-list'
+          grapes:
+            $ref: '#/components/examples/simple-grape-list'
+        - name: Sicily
+          country:
+            name: Italy
+          producers:
+            $ref: '#/components/examples/simple-producer-list'
+          grapes:
+            $ref: '#/components/examples/simple-grape-list'
+
+    
+    simple-country-example:
+      description: country object only containing the name of the country
+      value:
+        name: France
+    complex-country-example:
+      description: country object with list of its associated regions
+      value:
+        name: France
+        regions:
+          - name: Lyon
+          - name: Bordeaux
+    simple-country-list:
+      description: list of simple country objects
+      value:
+        - name : France
+        - name: Italy
+    complex-country-list:
+      description: list of complex country objects
+      value:
+        - name: France
+          regions:
+            - name: Lyon
+            - name: Bordeaux
+        - name: Italy
+          regions:
+            - name: Tuscany
+            - name: Sicily
+            
+  securitySchemes:
+
+security:
+
+paths:
+  /login:
+    post:
+  /logout:
+    post:
+  /register:
+    post:
+  /user/{username}:
+    get:
+		delete:
+  /wine_types:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type-list:
+                  $ref: '#/components/examples/simple-wine-type-list'
+                complex-wine-type-list:
+                  $ref: '#/components/examples/complex-wine-type-list'
+              
+    post:
+      summary: Create a new wine type
+      requestBody:
+        description: JSON with data for a new wine type
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Wine_type'
+            examples:
+              simple-wine-type:
+                $ref: '#/components/examples/simple-wine-type-example'
+      responses:
+        '201':
+          description: Requested wine type created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type-example'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wine_types/{wine_type}:
+    parameters:
+    - $ref: '#/components/parameters/wine_type'
+    get:
+      summary: Returns single, specified wine type
+      responses:
+        '200':
+          description: representation of wine type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type-example'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified wine type from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified wine type in the database
+      requestBody:
+        description: JSON with updated data for wine type
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Wine_type'
+            examples:
+              simple-wine-type:
+                $ref: '#/components/examples/simple-wine-type-example'
+      responses:
+        '200':
+          description: Wine type successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type-example'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wines:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine-list:
+                  $ref: '#/components/examples/simple-wine-list'
+                complex-wine-list:
+                  $ref: '#/components/examples/complex-wine-list'
+              
+    post:
+      summary: Create a new wine
+      requestBody:
+        description: JSON with data for a new wine
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Wine'
+            examples:
+              simple-wine:
+                $ref: '#/components/examples/simple-wine-example'
+      responses:
+        '201':
+          description: Requested wine created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine-example'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wines/{wine}:
+    parameters:
+    - $ref: '#/components/parameters/wine'
+    get:
+      summary: Returns single, specified wine
+      responses:
+        '200':
+          description: representation of wine
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine-example'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified wine from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified wine in the database
+      requestBody:
+        description: JSON with updated data for wine
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Wine'
+            examples:
+              simple-wine:
+                $ref: '#/components/examples/simple-wine-example'
+      responses:
+        '200':
+          description: Wine successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine-example'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /grapes:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape-list:
+                  $ref: '#/components/examples/simple-grape-list'
+                complex-grape-list:
+                  $ref: '#/components/examples/complex-grape-list'
+              
+    post:
+      summary: Create a new grape
+      requestBody:
+        description: JSON with data for a new grape
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Grape'
+            examples:
+              simple-grape:
+                $ref: '#/components/examples/simple-grape-example'
+      responses:
+        '201':
+          description: Requested grape created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape-example'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /grapes/{grape}:
+    parameters:
+    - $ref: '#/components/parameters/grape'
+    get:
+      summary: Returns single, specified grape
+      responses:
+        '200':
+          description: representation of grape
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape-example'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified grape from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified grape in the database
+      requestBody:
+        description: JSON with updated data for grape
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Grape'
+            examples:
+              simple-grape:
+                $ref: '#/components/examples/simple-grape-example'
+      responses:
+        '200':
+          description: Grape successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape-example'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /producers:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer-list:
+                  $ref: '#/components/examples/simple-producer-list'
+                complex-producer-list:
+                  $ref: '#/components/examples/complex-producer-list'
+              
+    post:
+      summary: Create a new producer
+      requestBody:
+        description: JSON with data for a new producer
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Producer'
+            examples:
+              simple-producer:
+                $ref: '#/components/examples/simple-producer-example'
+      responses:
+        '201':
+          description: Requested producer created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer-example'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /producers/{producer}:
+    parameters:
+    - $ref: '#/components/parameters/producer'
+    get:
+      summary: Returns single, specified producer
+      responses:
+        '200':
+          description: representation of producer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer-example'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified producer from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified producer in the database
+      requestBody:
+        description: JSON with updated data for producer
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Producer'
+            examples:
+              simple-producer:
+                $ref: '#/components/examples/simple-producer-example'
+      responses:
+        '200':
+          description: Producer successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer-example'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /regions:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+              examples:
+                simple-region-list:
+                  $ref: '#/components/examples/simple-region-list'
+                complex-region-list:
+                  $ref: '#/components/examples/complex-region-list'
+              
+    post:
+      summary: Create a new region
+      requestBody:
+        description: JSON with data for a new region
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Region'
+            examples:
+              simple-region:
+                $ref: '#/components/examples/simple-region-example'
+      responses:
+        '201':
+          description: Requested region created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region-example'
+                complex-region:
+                  $ref: '#/components/examples/complex-region-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /regions/{region}:
+    parameters:
+    - $ref: '#/components/parameters/region'
+    get:
+      summary: Returns single, specified region
+      responses:
+        '200':
+          description: representation of region
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region-example'
+                complex-region:
+                  $ref: '#/components/examples/complex-region-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified region from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified region in the database
+      requestBody:
+        description: JSON with updated data for region
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Region'
+            examples:
+              simple-region:
+                $ref: '#/components/examples/simple-region-example'
+      responses:
+        '200':
+          description: Region successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region-example'
+                complex-region:
+                  $ref: '#/components/examples/complex-region-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        
+  /countries:
+    get:
+      summary: Returns a list of all countries in database
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+              examples:
+                simple-country-list:
+                  $ref: '#/components/examples/simple-country-list'
+                complex-country-list:
+                  $ref: '#/components/examples/complex-country-list'
+              
+    post:
+      summary: Create a new country
+      requestBody:
+        description: JSON with data for a new country
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Country'
+            examples:
+              simple-country:
+                $ref: '#/components/examples/simple-country-example'
+      responses:
+        '201':
+          description: Requested country created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country-example'
+                complex-country:
+                  $ref: '#/components/examples/complex-country-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+          
+  /countries/{country}:
+    parameters:
+    - $ref: '#/components/parameters/country'
+    get:
+      summary: Returns single, specified country
+      responses:
+        '200':
+          description: representation of country
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country-example'
+                complex-country:
+                  $ref: '#/components/examples/complex-country-example'
+        '404':
+           $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes specified country from the database
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Edits specified country in the database
+      requestBody:
+        description: JSON with updated data for country
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Country'
+            examples:
+              simple-country:
+                $ref: '#/components/examples/simple-country-example'
+      responses:
+        '200':
+          description: Country successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country-example'
+                complex-country:
+                  $ref: '#/components/examples/complex-country-example'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
