@@ -94,11 +94,7 @@ def populate_database_cmd():
                                    'for producing the finest Port wines. Graham’s has always been a pioneer. '
                                    'Graham\'s was one of the first Port companies to invest in its own '
                                    'vineyards in Portugal’s Douro Valley in 1890 and is now at the cutting '
-                                   'edge of innovation in winemaking techniques. Today, five Symington '
-                                   'cousins share responsibility for every aspect of the company and '
-                                   'personally make the Graham’s wines. They too have been involved with '
-                                   'Port and the Douro for many generations, with ancestry dating back to '
-                                   'the mid-17th century.')
+                                   'edge of innovation in winemaking techniques.')
     grahams.region = norte
     grahams.add()
 
