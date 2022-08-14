@@ -1,0 +1,18 @@
+type: object
+properties:
+  name:
+    description: Name of the grape
+    type: string
+  region:
+    description: Main region of the grape
+    $ref: './Region.yml'
+  description:
+    description: Description of the wine
+    type: string
+  wines:
+    description: Wines made with the grape
+    type: array
+    items:
+      $ref: './Wine.yml'
+required:
+  - name

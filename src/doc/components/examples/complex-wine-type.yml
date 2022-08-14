@@ -1,0 +1,6 @@
+description: Wine type object with list of associated wines
+value:
+  type: Red
+  wines:
+    - name: Wine 1
+    - name: Wine 2

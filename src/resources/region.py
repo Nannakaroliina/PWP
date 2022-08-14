@@ -9,11 +9,12 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 
 from src.models.region import Region
 from src.models.country import Country
 from src.schemas.schemas import CountrySchema, RegionSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND, BAD_REQUEST
 
 country_schema = CountrySchema()
 region_schema = RegionSchema()
@@ -31,7 +32,10 @@ class RegionList(Resource):
         Get a list of regions from database
         :return: List of regions
         """
-        return {"regions": region_list_schema.dump(Region.find_all())}, 200
+        try:
+            return {"regions": region_list_schema.dump(Region.find_all())}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400
 
     @classmethod
     @jwt_required()

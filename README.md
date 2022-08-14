@@ -25,7 +25,7 @@ all needed dependencies which needs to be installed:
 - Flask for creating the web application
 - Flask SQLAlchemy for SQLAlchemy support
 - Flask RESTful for building REST API
-- Flasgger for OpenAPI specification
+- Flask-redoc for OpenAPI specification
 - Flask Uploads for image uploads and serving
 - boto3 for storing pictures and serving them
 - python-dotenv for reading env configurations

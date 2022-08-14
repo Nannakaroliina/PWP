@@ -1,0 +1,6 @@
+name: region
+in: path
+description: Unique name of a producer
+required: true
+schema:
+  type: string

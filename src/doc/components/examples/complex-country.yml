@@ -1,0 +1,6 @@
+description: Country object with list of its associated regions
+value:
+  name: France
+  regions:
+    - name: Lyon
+    - name: Bordeaux

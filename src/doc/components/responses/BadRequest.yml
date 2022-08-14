@@ -1,0 +1,6 @@
+description: Bad request
+content:
+  application/json:
+    schema:
+      type: string
+      example: Schema validation error

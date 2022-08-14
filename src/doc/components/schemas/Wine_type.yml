@@ -1,0 +1,12 @@
+type: object
+properties:
+  type:
+    description: The general type of wine e.g. red, white
+    type: string
+  wines:
+    description: Wines of this type
+    type: array
+    items:
+      $ref: './Wine.yml'
+required:
+- type

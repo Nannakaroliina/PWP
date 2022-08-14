@@ -1,0 +1,80 @@
+parameters:
+- $ref: '../components/parameters/wine.yml'
+get:
+  summary: Get wine
+  description: Get specified wine from database by given name.
+  operationId: getWineByName
+  tags:
+    - Wine
+  responses:
+    '200':
+      description: representation of wine
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Wine.yml'
+          examples:
+            simple-wine:
+              $ref: '../components/examples/simple-wine.yml'
+            complex-wine:
+              $ref: '../components/examples/complex-wine.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Deletes wine
+  description: Delete wine from database.
+  operationId: deleteWine
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Wine
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update wine
+  description: Update the existing wine in database. Can modify either one or all fields of the wine.
+  operationId: updateWine
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Wine
+  requestBody:
+    description: JSON with updated data for wine
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Wine.yml'
+        examples:
+          simple-wine:
+            $ref: '../components/examples/simple-wine.yml'
+  responses:
+    '200':
+      description: Wine successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Wine.yml'
+          examples:
+            simple-wine:
+              $ref: '../components/examples/simple-wine.yml'
+            complex-wine:
+              $ref: '../components/examples/complex-wine.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

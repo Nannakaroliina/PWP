@@ -1,0 +1,35 @@
+post:
+  summary: Create a new user
+  description: Register user to access the endpoints which are not accessible without login.
+  operationId: registerUser
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - User
+  requestBody:
+    description: JSON with necessary info for new user
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/User.yml'
+        example:
+            username: Johnny-boy
+            password: pass-Word-2345
+            email: johnny.james@mail.com
+            role: developer
+  responses:
+    '201':
+      description: User created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/UserDump.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '409':
+      description: Username already taken
+      content:
+        application/json:
+          schema:
+            type: string
+            example: A user with that username already exists, choose another one.

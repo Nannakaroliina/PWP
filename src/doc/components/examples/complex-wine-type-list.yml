@@ -1,0 +1,10 @@
+description: Wine type list with wines
+value:
+  - type: Type 1
+    wines:
+      - name: Wine 1
+      - name: Wine 2
+  - type: Type 2
+    wines:
+      - name: Wine 1
+      - name: Wine 2

@@ -1,0 +1,6 @@
+description: Requested item not found from the database
+content:
+  application/json:
+    schema:
+      type: string
+      example: Item not found

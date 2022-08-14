@@ -1,0 +1,80 @@
+parameters:
+- $ref: '../components/parameters/region.yml'
+get:
+  summary: Get region
+  description: Get a specified region from database by given name.
+  operationId: getRegionByName
+  tags:
+    - Region
+  responses:
+    '200':
+      description: representation of region
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Region.yml'
+          examples:
+            simple-region:
+              $ref: '../components/examples/simple-region.yml'
+            complex-region:
+              $ref: '../components/examples/complex-region.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Delete region
+  description: Delete specified region from database.
+  operationId: deleteRegion
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Region
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update region
+  description: Update the existing region on database, modify one or all fields of region.
+  operationId: updateRegion
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Region
+  requestBody:
+    description: JSON with updated data for region
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Region.yml'
+        examples:
+          simple-region:
+            $ref: '../components/examples/simple-region.yml'
+  responses:
+    '200':
+      description: Region successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Region.yml'
+          examples:
+            simple-region:
+              $ref: '../components/examples/simple-region.yml'
+            complex-region:
+              $ref: '../components/examples/complex-region.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

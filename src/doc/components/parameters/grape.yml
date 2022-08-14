@@ -1,0 +1,6 @@
+name: grape
+in: path
+description: Unique name of a grape
+required: true
+schema:
+  type: string

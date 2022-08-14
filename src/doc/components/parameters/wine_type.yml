@@ -1,0 +1,6 @@
+name: wine_type
+in: path
+description: Unique name of a wine type
+required: true
+schema:
+  type: string

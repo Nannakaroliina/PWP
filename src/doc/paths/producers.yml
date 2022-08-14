@@ -1,0 +1,60 @@
+get:
+  summary: Get producers
+  description: Get a list of producers from database.
+  operationId: getProducers
+  tags:
+    - Producer
+  responses:
+    '200':
+      description: Complete collection
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Producer.yml'
+          examples:
+            simple-producer-list:
+              $ref: '../components/examples/simple-producer-list.yml'
+            complex-producer-list:
+              $ref: '../components/examples/complex-producer-list.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+
+post:
+  summary: Create producer
+  description: Create a new producer to database.
+  operationId: addProducer
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Producer
+  requestBody:
+    description: JSON with data for a new producer
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Producer.yml'
+        examples:
+          simple-producer:
+            $ref: '../components/examples/simple-producer.yml'
+  responses:
+    '201':
+      description: Requested producer created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Producer.yml'
+          examples:
+            simple-producer:
+              $ref: '../components/examples/simple-producer.yml'
+            complex-producer:
+              $ref: '../components/examples/complex-producer.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

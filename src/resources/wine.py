@@ -18,7 +18,7 @@ from src.models.wine_type import Wine_type
 from src.schemas.schemas import GrapeSchema, ProducerSchema, WineSchema
 
 from src.utils.constants import \
-    ALREADY_EXISTS, NOT_JSON, ERROR_INSERTING, ERROR_DELETING, NOT_FOUND
+    ALREADY_EXISTS, NOT_JSON, ERROR_INSERTING, ERROR_DELETING, NOT_FOUND, BAD_REQUEST
 
 grape_schema = GrapeSchema()
 producer_schema = ProducerSchema()
@@ -36,7 +36,10 @@ class WineList(Resource):
         Get a list of wines from database
         :return: List of wines
         """
-        return {"wines": wine_list_schema.dump(Wine.find_all())}, 200
+        try:
+            return {"wines": wine_list_schema.dump(Wine.find_all())}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400
 
     @classmethod
     @jwt_required()

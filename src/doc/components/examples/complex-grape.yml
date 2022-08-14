@@ -1,0 +1,9 @@
+description: Grape object with full information
+value:
+  name: Grape 1
+  description: Green and fresh
+  region:
+    name: Region 1
+  wines:
+    - name: Wine 1
+    - name: Wine 2

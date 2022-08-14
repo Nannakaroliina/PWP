@@ -8,10 +8,11 @@ from flask_jwt_extended import jwt_required
 from marshmallow import ValidationError
 from flask_restful import Resource
 from flask import request
+from werkzeug.exceptions import BadRequest
 
 from src.models.wine_type import Wine_type
 from src.schemas.schemas import WineTypeSchema
-from src.utils.constants import NOT_JSON, ERROR_INSERTING, NOT_FOUND, ERROR_DELETING
+from src.utils.constants import NOT_JSON, ERROR_INSERTING, NOT_FOUND, ERROR_DELETING, BAD_REQUEST
 
 wine_type_schema = WineTypeSchema()
 wine_type_list_schema = WineTypeSchema(many=True)
@@ -28,7 +29,10 @@ class Wine_typeList(Resource):
         Get a list of wine types from database
         :return: List of wine types
         """
-        return {"wine_types": wine_type_list_schema.dump(Wine_type.find_all())}, 200
+        try:
+            return {"wine_types": wine_type_list_schema.dump(Wine_type.find_all())}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400
 
     @classmethod
     @jwt_required()

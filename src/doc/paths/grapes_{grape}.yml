@@ -1,0 +1,79 @@
+parameters:
+- $ref: '../components/parameters/grape.yml'
+get:
+  summary: Get grape
+  description: Get specific grape from the database.
+  operationId: getGrapeByName
+  tags:
+    - Grape
+  responses:
+    '200':
+      description: representation of grape
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Grape.yml'
+          examples:
+            simple-grape:
+              $ref: '../components/examples/simple-grape.yml'
+            complex-grape:
+              $ref: '../components/examples/complex-grape.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+delete:
+  summary: Delete grape
+  description: Delete specific grape from database.
+  operationId: deleteGrape
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Grape
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update grape
+  description: Update the existing grape on database, can modify one or all fields of the grape.
+  operationId: updateGrape
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Grape
+  requestBody:
+    description: JSON with updated data for grape
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Grape.yml'
+        examples:
+          simple-grape:
+            $ref: '../components/examples/simple-grape.yml'
+  responses:
+    '200':
+      description: Grape successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Grape.yml'
+          examples:
+            simple-grape:
+              $ref: '../components/examples/simple-grape.yml'
+            complex-grape:
+              $ref: '../components/examples/complex-grape.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

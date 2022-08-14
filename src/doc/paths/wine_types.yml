@@ -1,0 +1,60 @@
+get:
+  summary: Get wine types
+  description: Get a list of wine types from database.
+  operationId: getWinetypes
+  tags:
+    - Wine type
+  responses:
+    '200':
+      description: Complete collection
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Wine_type.yml'
+          examples:
+            simple-wine-type-list:
+              $ref: '../components/examples/simple-wine-type-list.yml'
+            complex-wine-type-list:
+              $ref: '../components/examples/complex-wine-type-list.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+
+post:
+  summary: Create wine type
+  description: Create a wine type to database.
+  operationId: addWinetype
+  tags:
+    - Wine type
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: JSON with data for a new wine type
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Wine_type.yml'
+        examples:
+          simple-wine-type:
+            $ref: '../components/examples/simple-wine-type.yml'
+  responses:
+    '201':
+      description: Requested wine type created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Wine_type.yml'
+          examples:
+            simple-wine-type:
+              $ref: '../components/examples/simple-wine-type.yml'
+            complex-wine-type:
+              $ref: '../components/examples/complex-wine-type.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

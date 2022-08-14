@@ -1,0 +1,4 @@
+description: Simple grape object list
+value:
+  - name: Grape 1
+  - name: Grape 2

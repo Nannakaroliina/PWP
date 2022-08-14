@@ -1,0 +1,4 @@
+description: Simple wine object list
+value:
+  - name: Wine 1
+  - name: Wine 2

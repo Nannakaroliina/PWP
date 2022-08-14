@@ -1,0 +1,60 @@
+get:
+  summary: Get grapes
+  description: Get a list of grapes from database.
+  operationId: getGrapes
+  tags:
+    - Grape
+  responses:
+    '200':
+      description: Complete collection
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Grape.yml'
+          examples:
+            simple-grape-list:
+              $ref: '../components/examples/simple-grape-list.yml'
+            complex-grape-list:
+              $ref: '../components/examples/complex-grape-list.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+
+post:
+  summary: Create grape
+  description: Create a new grape to database.
+  operationId: addGrape
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Grape
+  requestBody:
+    description: JSON with data for a new grape
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Grape.yml'
+        examples:
+          simple-grape:
+            $ref: '../components/examples/simple-grape.yml'
+  responses:
+    '201':
+      description: Requested grape created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Grape.yml'
+          examples:
+            simple-grape:
+              $ref: '../components/examples/simple-grape.yml'
+            complex-grape:
+              $ref: '../components/examples/complex-grape.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

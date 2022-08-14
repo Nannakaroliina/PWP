@@ -1,0 +1,16 @@
+description: Producer list with full information
+value:
+  - name: Producer 1
+    region:
+      name: Region 1
+    description: Hi we make wine
+    wines:
+      - name: Wine 1
+      - name: Wine 2
+  - name: Producer 2
+    region:
+      name: Region 1
+    description: we also make wine
+    wines:
+      - name: Wine 1
+      - name: Wine 2

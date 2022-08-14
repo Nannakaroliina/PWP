@@ -8,6 +8,7 @@ from flask_jwt_extended import create_access_token, \
     unset_jwt_cookies
 from flask_restful import Resource
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.schemas.schemas import UserSchema
@@ -15,7 +16,7 @@ from src.models.user import User
 from src.utils.constants import \
     INVALID_CREDENTIALS, USER_ALREADY_EXISTS, \
     CREATED_SUCCESSFULLY, USER_NOT_FOUND, \
-    USER_DELETED, USER_LOGGED_OUT, LOGIN_SUCCESSFUL
+    USER_DELETED, USER_LOGGED_OUT, LOGIN_SUCCESSFUL, BAD_REQUEST
 
 user_schema = UserSchema()
 
@@ -144,5 +145,8 @@ class UserLogout(Resource):
 
         :return: string info
         """
-        unset_jwt_cookies(jsonify({"[INFO]": USER_LOGGED_OUT}))
-        return {"[INFO]": USER_LOGGED_OUT}, 200
+        try:
+            unset_jwt_cookies(jsonify({"[INFO]": USER_LOGGED_OUT}))
+            return {"[INFO]": USER_LOGGED_OUT}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400

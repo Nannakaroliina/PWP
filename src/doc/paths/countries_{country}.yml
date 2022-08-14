@@ -1,0 +1,80 @@
+parameters:
+- $ref: '../components/parameters/country.yml'
+get:
+  summary: Get country
+  description: Get a specific country from database by given name.
+  operationId: getCountries
+  tags:
+    - Country
+  responses:
+    '200':
+      description: representation of country
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Country.yml'
+          examples:
+            simple-country:
+              $ref: '../components/examples/simple-country.yml'
+            complex-country:
+              $ref: '../components/examples/complex-country.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Delete country
+  description: Delete specified country from database.
+  operationId: deleteCountry
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Country
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update country
+  operationId: updateCountry
+  description: Update the existing country in database, modify one or all fields of country.
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Country
+  requestBody:
+    description: JSON with updated data for country
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Country.yml'
+        examples:
+          simple-country:
+            $ref: '../components/examples/simple-country.yml'
+  responses:
+    '200':
+      description: Country successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Country.yml'
+          examples:
+            simple-country:
+              $ref: '../components/examples/simple-country.yml'
+            complex-country:
+              $ref: '../components/examples/complex-country.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

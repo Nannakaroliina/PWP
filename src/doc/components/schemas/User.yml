@@ -1,0 +1,17 @@
+type: object
+properties:
+  username:
+    description: User's unique identifier
+    type: string
+  password:
+    description: User's password, must contain at least 8 characters, lower and upper chars, number and special char
+    type: string
+  email:
+    description: An email address for contacting user, regex validated
+    type: string
+  role:
+    description: Role, either developer, producer or expert
+    type: string
+required:
+  - username
+  - password

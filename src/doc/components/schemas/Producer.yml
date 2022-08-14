@@ -1,0 +1,19 @@
+description: A winery producing wine
+type: object
+properties:
+  name:
+    description: Name of the producer
+    type: string
+  region:
+    description: Region wher producer is located
+    $ref: './Region.yml'
+  description:
+    description: Description of the producer
+    type: string
+  wines:
+    description: Wines of the producer
+    type: array
+    items:
+      $ref: './Wine.yml'
+required:
+  - name

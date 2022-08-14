@@ -1,0 +1,60 @@
+get:
+  summary: Get countries
+  description: Get a list of countries from database.
+  operationId: getCountryByName
+  tags:
+    - Country
+  responses:
+    '200':
+      description: Complete collection
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Country.yml'
+          examples:
+            simple-country-list:
+              $ref: '../components/examples/simple-country-list.yml'
+            complex-country-list:
+              $ref: '../components/examples/complex-country-list.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+
+post:
+  summary: Create country
+  description: Create a new country to database.
+  operationId: addCountry
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Country
+  requestBody:
+    description: JSON with data for a new country
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Country.yml'
+        examples:
+          simple-country:
+            $ref: '../components/examples/simple-country.yml'
+  responses:
+    '201':
+      description: Requested country created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Country.yml'
+          examples:
+            simple-country:
+              $ref: '../components/examples/simple-country.yml'
+            complex-country:
+              $ref: '../components/examples/complex-country.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

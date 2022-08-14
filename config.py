@@ -1,5 +1,11 @@
+"""
+Configuration file to provide the app configuration
+"""
 from os import environ
 from dotenv import load_dotenv
+
+from src.schemas.schemas import WineSchema, UserSchema, WineTypeSchema, GrapeSchema, ProducerSchema, RegionSchema, \
+    CountrySchema
 
 load_dotenv(".env")
 
@@ -19,3 +25,10 @@ class Config:
 
     # Authentication
     JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY")
+
+    # Redoc
+    REDOC = {'title': 'Winetime',
+             'marshmallow_schemas': [UserSchema, WineSchema, WineTypeSchema, GrapeSchema,
+                                     ProducerSchema, RegionSchema, CountrySchema],
+             'version': '0.0.1',
+             'openapi_version': '3.0.3'}

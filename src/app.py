@@ -9,6 +9,7 @@ from flask.cli import with_appcontext
 from flask_bootstrap import Bootstrap
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+from flask_redoc import Redoc
 from flask_restful import Api
 
 from src.database import db
@@ -35,6 +36,7 @@ db.init_app(app)
 api = Api(app)
 migrate = Migrate(app, db)
 Bootstrap(app)
+redoc = Redoc(app, "doc/bundled.yml")
 
 
 @app.route("/")

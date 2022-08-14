@@ -1,0 +1,40 @@
+parameters:
+- $ref: '../components/parameters/username.yml'
+get:
+  summary: Get user
+  description: Get the information about existing user.
+  operationId: getUserByUsername
+  tags:
+    - User
+  responses:
+    '200':
+      description: Return retrieved user
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/UserDump.yml'
+          example:
+            username: Johnny-boy
+            email: johnny.james@mail.com
+            role: developer
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Delete user
+  description: Delete specified user from database.
+  operationId: deleteUser
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - User
+  responses:
+    '200':
+      description: Deleted successfully
+      content:
+        application/json:
+          schema:
+            type: string
+            example: user deleted successfully.
+    '404':
+      $ref: '../components/responses/NotFound.yml'

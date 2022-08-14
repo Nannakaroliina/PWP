@@ -1,0 +1,34 @@
+type: object
+properties:
+  name:
+    description: Name of the wine
+    type: string
+  wine_type:
+    description: Wine type of the wine
+    $ref: './Wine_type.yml'
+  style:
+    description: Describes e.g., taste or feel of wine
+    type: string
+  producer:
+    description: Producers of the wine
+    $ref: './Producer.yml'
+  year_produced:
+    description: The year wine production has taken place
+    type: integer
+  alcohol_percentage:
+    description: How many percent of alcohol wine contains
+    type: number
+  volume:
+    description: How much wine one bottle cointains
+    type: integer
+  picture:
+    description: Reference url to the picture storage
+    type: string
+  description:
+    description: Description of wine and its attributes
+    type: string
+  grape:
+    description: Main grape of the wine
+    $ref: './Grape.yml'
+required:
+  - name

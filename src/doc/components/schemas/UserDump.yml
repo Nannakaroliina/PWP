@@ -1,0 +1,11 @@
+type: object
+properties:
+  username:
+    description: Existing username to login
+    type: string
+  email:
+    description: An email address for contacting user, regex validated
+    type: string
+  role:
+    description: Role, either developer, producer or expert
+    type: string

@@ -1,0 +1,11 @@
+type: object
+properties:
+  username:
+    description: Existing username to login
+    type: string
+  password:
+    description: User's password, must contain at least 8 characters, lower and upper chars, number and special char
+    type: string
+required:
+  - username
+  - password

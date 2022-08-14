@@ -1,0 +1,6 @@
+description: Media type something other than application/json
+content:
+  application/json:
+    schema:
+      type: string
+      example: Request content must be in json form

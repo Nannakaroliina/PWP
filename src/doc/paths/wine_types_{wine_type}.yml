@@ -1,0 +1,82 @@
+parameters:
+- $ref: '../components/parameters/wine_type.yml'
+get:
+  summary: Get wine type
+  description: Get a specific wine types from database by given name.
+  operationId: getWinetypeByName
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Wine type
+  responses:
+    '200':
+      description: Representation of wine type
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Wine_type.yml'
+          examples:
+            simple-wine-type:
+              $ref: '../components/examples/simple-wine-type.yml'
+            complex-wine-type:
+              $ref: '../components/examples/complex-wine-type.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Deletes wine type
+  description: Delete specified wine type from database by given name.
+  operationId: deleteWinetype
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Wine type
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update wine type
+  description: Update the existing wine type in database.
+  operationId: updateWinetype
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Wine type
+  requestBody:
+    description: JSON with updated data for wine type
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Wine_type.yml'
+        examples:
+          simple-wine-type:
+            $ref: '../components/examples/simple-wine-type.yml'
+  responses:
+    '200':
+      description: Wine type successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Wine_type.yml'
+          examples:
+            simple-wine-type:
+              $ref: '../components/examples/simple-wine-type.yml'
+            complex-wine-type:
+              $ref: '../components/examples/complex-wine-type.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

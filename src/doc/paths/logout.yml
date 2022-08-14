@@ -1,0 +1,18 @@
+post:
+  summary: Logs out user
+  description: Logout the current user from the api.
+  operationId: logoutUser
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - User
+  responses:
+    '200':
+      description: User logged out successfully
+      content:
+        application/json:
+          schema:
+            type: string
+            example: Successfully logged out.
+    '400':
+      $ref: '../components/responses/BadRequest.yml'

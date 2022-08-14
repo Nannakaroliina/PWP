@@ -1,0 +1,10 @@
+description: List of country objects with full information
+value:
+  - name: France
+    regions:
+      - name: Lyon
+      - name: Bordeaux
+  - name: Italy
+    regions:
+      - name: Tuscany
+      - name: Sicily

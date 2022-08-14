@@ -1,0 +1,20 @@
+description: Region list with full information
+value:
+  - name: Tuscany
+    country:
+      name: Italy
+    producers:
+      - name: Producer 1
+      - name: Producer 2
+    grapes:
+      - name: Grape 1
+      - name: Grape 2
+  - name: Sicily
+    country:
+      name: Italy
+    producers:
+      - name: Producer 1
+      - name: Producer 2
+    grapes:
+      - name: Grape 1
+      - name: Grape 2

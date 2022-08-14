@@ -1,0 +1,13 @@
+description: Wider geographical area where region is located
+type: object
+properties:
+  name:
+    description: Name of the country
+    type: string
+  regions:
+    description: Regions of the country
+    type: array
+    items:
+      $ref: './Region.yml'
+required:
+  - name

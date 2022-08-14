@@ -1,0 +1,80 @@
+parameters:
+- $ref: '../components/parameters/producer.yml'
+get:
+  summary: Get producer
+  description: Get specific producer from the database by given name.
+  operationId: getProducerByName
+  tags:
+    - Producer
+  responses:
+    '200':
+      description: representation of producer
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Producer.yml'
+          examples:
+            simple-producer:
+              $ref: '../components/examples/simple-producer.yml'
+            complex-producer:
+              $ref: '../components/examples/complex-producer.yml'
+    '404':
+       $ref: '../components/responses/NotFound.yml'
+
+delete:
+  summary: Delete producer
+  description: Delete specified producer from database.
+  operationId: deleteProducer
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Producer
+  responses:
+    '200':
+      description: Specified item was successfully deleted
+      content:
+        application/json:
+          schema:
+            type: string
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'
+
+patch:
+  summary: Update producer
+  description: Update the existing producer on database, modify one or all fields of producer.
+  operationId: updateProducer
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Producer
+  requestBody:
+    description: JSON with updated data for producer
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Producer.yml'
+        examples:
+          simple-producer:
+            $ref: '../components/examples/simple-producer.yml'
+  responses:
+    '200':
+      description: Producer successfully edited
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Producer.yml'
+          examples:
+            simple-producer:
+              $ref: '../components/examples/simple-producer.yml'
+            complex-producer:
+              $ref: '../components/examples/complex-producer.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

@@ -1,0 +1,6 @@
+name: country
+in: path
+description: Unique name of a country
+required: true
+schema:
+  type: string

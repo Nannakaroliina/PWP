@@ -1,0 +1,60 @@
+get:
+  summary: Get regions
+  description: Get a list of regions from database.
+  operationId: getRegions
+  tags:
+    - Region
+  responses:
+    '200':
+      description: Complete collection
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/Region.yml'
+          examples:
+            simple-region-list:
+              $ref: '../components/examples/simple-region-list.yml'
+            complex-region-list:
+              $ref: '../components/examples/complex-region-list.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+
+post:
+  summary: Create region
+  description: Create a new region to the database.
+  operationId: addRegion
+  security:
+    - bearerAuth: [ ]
+  tags:
+    - Region
+  requestBody:
+    description: JSON with data for a new region
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Region.yml'
+        examples:
+          simple-region:
+            $ref: '../components/examples/simple-region.yml'
+  responses:
+    '201':
+      description: Requested region created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Region.yml'
+          examples:
+            simple-region:
+              $ref: '../components/examples/simple-region.yml'
+            complex-region:
+              $ref: '../components/examples/complex-region.yml'
+    '400':
+      $ref: '../components/responses/BadRequest.yml'
+    '404':
+      $ref: '../components/responses/NotFound.yml'
+    '415':
+      $ref: '../components/responses/UnsupportedMediaType.yml'
+    '500':
+      $ref: '../components/responses/ServerError.yml'

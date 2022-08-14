@@ -1,0 +1,16 @@
+description: Grape object list with full information
+value:
+  - name: Grape 1
+    description: Soft and sweet
+    region:
+      name: Region 1
+    wines:
+      - name: Wine 1
+      - name: Wine 2
+  - name: Grape 2
+    description: Nice and crispy and green
+    region:
+      name: Region 1
+    wines:
+      - name: Wine 1
+      - name: Wine 2

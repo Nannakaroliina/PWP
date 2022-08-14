@@ -1,0 +1,21 @@
+description: General geographical area where something is located
+type: object
+properties:
+  name:
+    description: Name of the region
+    type: string
+  country:
+    description: Country where region is located
+    $ref: './Country.yml'
+  grapes:
+    description: Grapes on the region
+    type: array
+    items:
+      $ref: './Grape.yml'
+  producers:
+    description: Producers on the region
+    type: array
+    items:
+      $ref: './Producer.yml'
+required:
+  - name

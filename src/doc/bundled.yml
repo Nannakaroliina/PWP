@@ -1,0 +1,1528 @@
+openapi: 3.0.3
+info:
+  title: Winetime API Documentation
+  version: 0.0.1
+  description: >
+    This project is a course project for the Programmable Web Project course. 
+
+
+    The API stores data about wine and its attributes, such as grapes, producers
+    and production regions.
+
+    It's designed and implemented in the way that user can fetch any kind of
+    data about wines etc. without
+
+    the need to register as a user. To add more wines into database or modify
+    the existing data, user needs to register.
+
+
+    Current implementation doesn't limit the user based on role what they can
+    do, that's under planning.
+
+    Email for user isn't either compulsory since we yet don't support user
+    communication through email.
+
+
+    API uses Bearer token based authentication which is implemented with JWT,
+    user needs to add the login details to header
+
+    or it's stored to cookies.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  contact:
+    email: tanja.setamaa@student.oulu.fi
+tags:
+  - name: User
+    description: >-
+      Operations to create, get or delete user, login or logout. Provides the
+      security for data modifications.
+  - name: Wine
+    description: >-
+      Wine operations to get wine or wines, create, update or delete wine with
+      required access token.
+  - name: Wine type
+    description: >-
+      Wine type operations to get wine type or wine types, create, update or
+      delete wine type with required access token.
+  - name: Producer
+    description: >-
+      Producer operations to get producer or producers, create, update or delete
+      producer with required access token.
+  - name: Grape
+    description: >-
+      Grape operations to get grape or grapes, create, update or delete grape
+      with required access token.
+  - name: Region
+    description: >-
+      Region operations to get region or regions, create, update or delete
+      region with required access token.
+  - name: Country
+    description: >-
+      Country operations to get country or countries, create, update or delete
+      country with required access token.
+servers:
+  - url: https://wine-time-api.herokuapp.com/api
+paths:
+  /login:
+    post:
+      summary: User login
+      description: >-
+        Login endpoint to login as an existing user. Login allows user to access
+        the endpoints that are not accessible without login such as post, delete
+        and patch.
+      operationId: loginUser
+      tags:
+        - User
+      requestBody:
+        description: JSON with login details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            example:
+              username: Johnny-boy
+              password: pass-Word-2345
+      responses:
+        '200':
+          description: User logged in successfully, returns bearer access token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Bearer <token>
+        '400':
+          $ref: '#/components/responses/BadRequest'
+          example: Schema validation error.
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: string
+                example: >-
+                  Invalid credentials, either username or password isn't
+                  correct!
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /logout:
+    post:
+      summary: Logs out user
+      description: Logout the current user from the api.
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      responses:
+        '200':
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Successfully logged out.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /register:
+    post:
+      summary: Create a new user
+      description: >-
+        Register user to access the endpoints which are not accessible without
+        login.
+      operationId: registerUser
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      requestBody:
+        description: JSON with necessary info for new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              username: Johnny-boy
+              password: pass-Word-2345
+              email: johnny.james@mail.com
+              role: developer
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDump'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Username already taken
+          content:
+            application/json:
+              schema:
+                type: string
+                example: A user with that username already exists, choose another one.
+  /user/{username}:
+    parameters:
+      - $ref: '#/components/parameters/username'
+    get:
+      summary: Get user
+      description: Get the information about existing user.
+      operationId: getUserByUsername
+      tags:
+        - User
+      responses:
+        '200':
+          description: Return retrieved user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDump'
+              example:
+                username: Johnny-boy
+                email: johnny.james@mail.com
+                role: developer
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete user
+      description: Delete specified user from database.
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      tags:
+        - User
+      responses:
+        '200':
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: user deleted successfully.
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /wine_types:
+    get:
+      summary: Get wine types
+      description: Get a list of wine types from database.
+      operationId: getWinetypes
+      tags:
+        - Wine type
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type-list:
+                  $ref: '#/components/examples/simple-wine-type-list'
+                complex-wine-type-list:
+                  $ref: '#/components/examples/complex-wine-type-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create wine type
+      description: Create a wine type to database.
+      operationId: addWinetype
+      tags:
+        - Wine type
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: JSON with data for a new wine type
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine_type'
+            examples:
+              simple-wine-type:
+                $ref: '#/components/examples/simple-wine-type'
+      responses:
+        '201':
+          description: Requested wine type created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wine_types/{wine_type}:
+    parameters:
+      - $ref: '#/components/parameters/wine_type'
+    get:
+      summary: Get wine type
+      description: Get a specific wine types from database by given name.
+      operationId: getWinetypeByName
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine type
+      responses:
+        '200':
+          description: Representation of wine type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes wine type
+      description: Delete specified wine type from database by given name.
+      operationId: deleteWinetype
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine type
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update wine type
+      description: Update the existing wine type in database.
+      operationId: updateWinetype
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine type
+      requestBody:
+        description: JSON with updated data for wine type
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine_type'
+            examples:
+              simple-wine-type:
+                $ref: '#/components/examples/simple-wine-type'
+      responses:
+        '200':
+          description: Wine type successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine_type'
+              examples:
+                simple-wine-type:
+                  $ref: '#/components/examples/simple-wine-type'
+                complex-wine-type:
+                  $ref: '#/components/examples/complex-wine-type'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wines:
+    get:
+      summary: Get wines
+      description: Get a list of wines from database.
+      operationId: getWines
+      tags:
+        - Wine
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine-list:
+                  $ref: '#/components/examples/simple-wine-list'
+                complex-wine-list:
+                  $ref: '#/components/examples/complex-wine-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create wine
+      description: Create a new wine to database.
+      operationId: addWine
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine
+      requestBody:
+        description: JSON with data for a new wine
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'
+            examples:
+              simple-wine:
+                $ref: '#/components/examples/simple-wine'
+      responses:
+        '201':
+          description: Requested wine created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /wines/{wine}:
+    parameters:
+      - $ref: '#/components/parameters/wine'
+    get:
+      summary: Get wine
+      description: Get specified wine from database by given name.
+      operationId: getWineByName
+      tags:
+        - Wine
+      responses:
+        '200':
+          description: representation of wine
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Deletes wine
+      description: Delete wine from database.
+      operationId: deleteWine
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update wine
+      description: >-
+        Update the existing wine in database. Can modify either one or all
+        fields of the wine.
+      operationId: updateWine
+      security:
+        - bearerAuth: []
+      tags:
+        - Wine
+      requestBody:
+        description: JSON with updated data for wine
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Wine'
+            examples:
+              simple-wine:
+                $ref: '#/components/examples/simple-wine'
+      responses:
+        '200':
+          description: Wine successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wine'
+              examples:
+                simple-wine:
+                  $ref: '#/components/examples/simple-wine'
+                complex-wine:
+                  $ref: '#/components/examples/complex-wine'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /grapes:
+    get:
+      summary: Get grapes
+      description: Get a list of grapes from database.
+      operationId: getGrapes
+      tags:
+        - Grape
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape-list:
+                  $ref: '#/components/examples/simple-grape-list'
+                complex-grape-list:
+                  $ref: '#/components/examples/complex-grape-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create grape
+      description: Create a new grape to database.
+      operationId: addGrape
+      security:
+        - bearerAuth: []
+      tags:
+        - Grape
+      requestBody:
+        description: JSON with data for a new grape
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grape'
+            examples:
+              simple-grape:
+                $ref: '#/components/examples/simple-grape'
+      responses:
+        '201':
+          description: Requested grape created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /grapes/{grape}:
+    parameters:
+      - $ref: '#/components/parameters/grape'
+    get:
+      summary: Get grape
+      description: Get specific grape from the database.
+      operationId: getGrapeByName
+      tags:
+        - Grape
+      responses:
+        '200':
+          description: representation of grape
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete grape
+      description: Delete specific grape from database.
+      operationId: deleteGrape
+      security:
+        - bearerAuth: []
+      tags:
+        - Grape
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update grape
+      description: >-
+        Update the existing grape on database, can modify one or all fields of
+        the grape.
+      operationId: updateGrape
+      security:
+        - bearerAuth: []
+      tags:
+        - Grape
+      requestBody:
+        description: JSON with updated data for grape
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grape'
+            examples:
+              simple-grape:
+                $ref: '#/components/examples/simple-grape'
+      responses:
+        '200':
+          description: Grape successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grape'
+              examples:
+                simple-grape:
+                  $ref: '#/components/examples/simple-grape'
+                complex-grape:
+                  $ref: '#/components/examples/complex-grape'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /producers:
+    get:
+      summary: Get producers
+      description: Get a list of producers from database.
+      operationId: getProducers
+      tags:
+        - Producer
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer-list:
+                  $ref: '#/components/examples/simple-producer-list'
+                complex-producer-list:
+                  $ref: '#/components/examples/complex-producer-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create producer
+      description: Create a new producer to database.
+      operationId: addProducer
+      security:
+        - bearerAuth: []
+      tags:
+        - Producer
+      requestBody:
+        description: JSON with data for a new producer
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producer'
+            examples:
+              simple-producer:
+                $ref: '#/components/examples/simple-producer'
+      responses:
+        '201':
+          description: Requested producer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /producers/{producer}:
+    parameters:
+      - $ref: '#/components/parameters/producer'
+    get:
+      summary: Get producer
+      description: Get specific producer from the database by given name.
+      operationId: getProducerByName
+      tags:
+        - Producer
+      responses:
+        '200':
+          description: representation of producer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete producer
+      description: Delete specified producer from database.
+      operationId: deleteProducer
+      security:
+        - bearerAuth: []
+      tags:
+        - Producer
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update producer
+      description: >-
+        Update the existing producer on database, modify one or all fields of
+        producer.
+      operationId: updateProducer
+      security:
+        - bearerAuth: []
+      tags:
+        - Producer
+      requestBody:
+        description: JSON with updated data for producer
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producer'
+            examples:
+              simple-producer:
+                $ref: '#/components/examples/simple-producer'
+      responses:
+        '200':
+          description: Producer successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Producer'
+              examples:
+                simple-producer:
+                  $ref: '#/components/examples/simple-producer'
+                complex-producer:
+                  $ref: '#/components/examples/complex-producer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /regions:
+    get:
+      summary: Get regions
+      description: Get a list of regions from database.
+      operationId: getRegions
+      tags:
+        - Region
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+              examples:
+                simple-region-list:
+                  $ref: '#/components/examples/simple-region-list'
+                complex-region-list:
+                  $ref: '#/components/examples/complex-region-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create region
+      description: Create a new region to the database.
+      operationId: addRegion
+      security:
+        - bearerAuth: []
+      tags:
+        - Region
+      requestBody:
+        description: JSON with data for a new region
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Region'
+            examples:
+              simple-region:
+                $ref: '#/components/examples/simple-region'
+      responses:
+        '201':
+          description: Requested region created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region'
+                complex-region:
+                  $ref: '#/components/examples/complex-region'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /regions/{region}:
+    parameters:
+      - $ref: '#/components/parameters/region'
+    get:
+      summary: Get region
+      description: Get a specified region from database by given name.
+      operationId: getRegionByName
+      tags:
+        - Region
+      responses:
+        '200':
+          description: representation of region
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region'
+                complex-region:
+                  $ref: '#/components/examples/complex-region'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete region
+      description: Delete specified region from database.
+      operationId: deleteRegion
+      security:
+        - bearerAuth: []
+      tags:
+        - Region
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update region
+      description: >-
+        Update the existing region on database, modify one or all fields of
+        region.
+      operationId: updateRegion
+      security:
+        - bearerAuth: []
+      tags:
+        - Region
+      requestBody:
+        description: JSON with updated data for region
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Region'
+            examples:
+              simple-region:
+                $ref: '#/components/examples/simple-region'
+      responses:
+        '200':
+          description: Region successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+              examples:
+                simple-region:
+                  $ref: '#/components/examples/simple-region'
+                complex-region:
+                  $ref: '#/components/examples/complex-region'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /countries:
+    get:
+      summary: Get countries
+      description: Get a list of countries from database.
+      operationId: getCountryByName
+      tags:
+        - Country
+      responses:
+        '200':
+          description: Complete collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+              examples:
+                simple-country-list:
+                  $ref: '#/components/examples/simple-country-list'
+                complex-country-list:
+                  $ref: '#/components/examples/complex-country-list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create country
+      description: Create a new country to database.
+      operationId: addCountry
+      security:
+        - bearerAuth: []
+      tags:
+        - Country
+      requestBody:
+        description: JSON with data for a new country
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Country'
+            examples:
+              simple-country:
+                $ref: '#/components/examples/simple-country'
+      responses:
+        '201':
+          description: Requested country created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country'
+                complex-country:
+                  $ref: '#/components/examples/complex-country'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /countries/{country}:
+    parameters:
+      - $ref: '#/components/parameters/country'
+    get:
+      summary: Get country
+      description: Get a specific country from database by given name.
+      operationId: getCountries
+      tags:
+        - Country
+      responses:
+        '200':
+          description: representation of country
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country'
+                complex-country:
+                  $ref: '#/components/examples/complex-country'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Delete country
+      description: Delete specified country from database.
+      operationId: deleteCountry
+      security:
+        - bearerAuth: []
+      tags:
+        - Country
+      responses:
+        '200':
+          description: Specified item was successfully deleted
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      summary: Update country
+      operationId: updateCountry
+      description: >-
+        Update the existing country in database, modify one or all fields of
+        country.
+      security:
+        - bearerAuth: []
+      tags:
+        - Country
+      requestBody:
+        description: JSON with updated data for country
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Country'
+            examples:
+              simple-country:
+                $ref: '#/components/examples/simple-country'
+      responses:
+        '200':
+          description: Country successfully edited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+              examples:
+                simple-country:
+                  $ref: '#/components/examples/simple-country'
+                complex-country:
+                  $ref: '#/components/examples/complex-country'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserLogin:
+      type: object
+      properties:
+        username:
+          description: Existing username to login
+          type: string
+        password:
+          description: >-
+            User's password, must contain at least 8 characters, lower and upper
+            chars, number and special char
+          type: string
+      required:
+        - username
+        - password
+    User:
+      type: object
+      properties:
+        username:
+          description: User's unique identifier
+          type: string
+        password:
+          description: >-
+            User's password, must contain at least 8 characters, lower and upper
+            chars, number and special char
+          type: string
+        email:
+          description: An email address for contacting user, regex validated
+          type: string
+        role:
+          description: Role, either developer, producer or expert
+          type: string
+      required:
+        - username
+        - password
+    UserDump:
+      type: object
+      properties:
+        username:
+          description: Existing username to login
+          type: string
+        email:
+          description: An email address for contacting user, regex validated
+          type: string
+        role:
+          description: Role, either developer, producer or expert
+          type: string
+    Wine_type:
+      type: object
+      properties:
+        type:
+          description: The general type of wine e.g. red, white
+          type: string
+        wines:
+          description: Wines of this type
+          type: array
+          items:
+            $ref: '#/components/schemas/Wine'
+      required:
+        - type
+    Region:
+      description: General geographical area where something is located
+      type: object
+      properties:
+        name:
+          description: Name of the region
+          type: string
+        country:
+          description: Country where region is located
+          $ref: '#/components/schemas/Country'
+        grapes:
+          description: Grapes on the region
+          type: array
+          items:
+            $ref: '#/components/schemas/Grape'
+        producers:
+          description: Producers on the region
+          type: array
+          items:
+            $ref: '#/components/schemas/Producer'
+      required:
+        - name
+    Country:
+      description: Wider geographical area where region is located
+      type: object
+      properties:
+        name:
+          description: Name of the country
+          type: string
+        regions:
+          description: Regions of the country
+          type: array
+          items:
+            $ref: '#/components/schemas/Region'
+      required:
+        - name
+    Wine:
+      type: object
+      properties:
+        name:
+          description: Name of the wine
+          type: string
+        wine_type:
+          description: Wine type of the wine
+          $ref: '#/components/schemas/Wine_type'
+        style:
+          description: Describes e.g., taste or feel of wine
+          type: string
+        producer:
+          description: Producers of the wine
+          $ref: '#/components/schemas/Producer'
+        year_produced:
+          description: The year wine production has taken place
+          type: integer
+        alcohol_percentage:
+          description: How many percent of alcohol wine contains
+          type: number
+        volume:
+          description: How much wine one bottle cointains
+          type: integer
+        picture:
+          description: Reference url to the picture storage
+          type: string
+        description:
+          description: Description of wine and its attributes
+          type: string
+        grape:
+          description: Main grape of the wine
+          $ref: '#/components/schemas/Grape'
+      required:
+        - name
+    Grape:
+      type: object
+      properties:
+        name:
+          description: Name of the grape
+          type: string
+        region:
+          description: Main region of the grape
+          $ref: '#/components/schemas/Region'
+        description:
+          description: Description of the wine
+          type: string
+        wines:
+          description: Wines made with the grape
+          type: array
+          items:
+            $ref: '#/components/schemas/Wine'
+      required:
+        - name
+    Producer:
+      description: A winery producing wine
+      type: object
+      properties:
+        name:
+          description: Name of the producer
+          type: string
+        region:
+          description: Region wher producer is located
+          $ref: '#/components/schemas/Region'
+        description:
+          description: Description of the producer
+          type: string
+        wines:
+          description: Wines of the producer
+          type: array
+          items:
+            $ref: '#/components/schemas/Wine'
+      required:
+        - name
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: string
+            example: Schema validation error
+    NotFound:
+      description: Requested item not found from the database
+      content:
+        application/json:
+          schema:
+            type: string
+            example: Item not found
+    UnsupportedMediaType:
+      description: Media type something other than application/json
+      content:
+        application/json:
+          schema:
+            type: string
+            example: Request content must be in json form
+    ServerError:
+      description: Internal server error occured
+      content:
+        application/json:
+          schema:
+            type: string
+            example: Internal server error
+  parameters:
+    username:
+      name: username
+      in: path
+      description: User's unique identifier
+      required: true
+      schema:
+        type: string
+    wine_type:
+      name: wine_type
+      in: path
+      description: Unique name of a wine type
+      required: true
+      schema:
+        type: string
+    wine:
+      name: wine
+      in: path
+      description: Unique name of a wine
+      required: true
+      schema:
+        type: string
+    grape:
+      name: grape
+      in: path
+      description: Unique name of a grape
+      required: true
+      schema:
+        type: string
+    producer:
+      name: producer
+      in: path
+      description: Unique name of a producer
+      required: true
+      schema:
+        type: string
+    region:
+      name: region
+      in: path
+      description: Unique name of a producer
+      required: true
+      schema:
+        type: string
+    country:
+      name: country
+      in: path
+      description: Unique name of a country
+      required: true
+      schema:
+        type: string
+  examples:
+    simple-wine-type-list:
+      description: Simple wine type list
+      value:
+        - type: Type 1
+        - type: Type 2
+    complex-wine-type-list:
+      description: Wine type list with wines
+      value:
+        - type: Type 1
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+        - type: Type 2
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+    simple-wine-type:
+      description: Wine type object with only the name
+      value:
+        type: Red
+    complex-wine-type:
+      description: Wine type object with list of associated wines
+      value:
+        type: Red
+        wines:
+          - name: Wine 1
+          - name: Wine 2
+    simple-wine-list:
+      description: Simple wine object list
+      value:
+        - name: Wine 1
+        - name: Wine 2
+    complex-wine-list:
+      description: Wwine object list with full information
+      value:
+        - name: Wine 1
+          style: Savory and classic
+          wine_type:
+            type: Red
+          producer:
+            name: Producer 1
+          year_produced: 1912
+          alcohol_percentage: 22.5
+          volume: 700
+          picture: https://wine-storage.s3.amazonaws.com/tenuta.png
+          description: A wonderful, warming wine
+          grape:
+            name: Grape 1
+        - name: Wine 2
+          style: Aromatic and floral
+          wine_type:
+            type: White
+          producer:
+            name: Producer 1
+          year_produced: 1999
+          alcohol_percentage: 10.5
+          volume: 500
+          picture: https://wine-storage.s3.amazonaws.com/tenuta.png
+          description: A curious, cooling wine
+          grape:
+            name: Grape 1
+    simple-wine:
+      description: Wine object with only a name
+      value:
+        name: Wine 1
+    complex-wine:
+      description: Wine object with full information
+      value:
+        name: Wine 1
+        style: Savory and classic
+        wine_type:
+          type: Red
+        producer:
+          name: Producer 1
+        year_produced: 1912
+        alcohol_percentage: 22.5
+        volume: 700
+        picture: https://wine-storage.s3.amazonaws.com/tenuta.png
+        description: A wonderful, warming wine
+        grape:
+          name: Grape 1
+    simple-grape-list:
+      description: Simple grape object list
+      value:
+        - name: Grape 1
+        - name: Grape 2
+    complex-grape-list:
+      description: Grape object list with full information
+      value:
+        - name: Grape 1
+          description: Soft and sweet
+          region:
+            name: Region 1
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+        - name: Grape 2
+          description: Nice and crispy and green
+          region:
+            name: Region 1
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+    simple-grape:
+      description: Simple grape object
+      value:
+        name: Grape 1
+    complex-grape:
+      description: Grape object with full information
+      value:
+        name: Grape 1
+        description: Green and fresh
+        region:
+          name: Region 1
+        wines:
+          - name: Wine 1
+          - name: Wine 2
+    simple-producer-list:
+      description: Simple producer list
+      value:
+        - name: Producer 1
+        - name: Producer 2
+    complex-producer-list:
+      description: Producer list with full information
+      value:
+        - name: Producer 1
+          region:
+            name: Region 1
+          description: Hi we make wine
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+        - name: Producer 2
+          region:
+            name: Region 1
+          description: we also make wine
+          wines:
+            - name: Wine 1
+            - name: Wine 2
+    simple-producer:
+      description: Simple producer object
+      value:
+        name: Producer 1
+    complex-producer:
+      description: Producer object with full information
+      value:
+        name: Producer 1
+        region:
+          name: Region 1
+        description: Hi we make wine
+        wines:
+          - name: Wine 1
+          - name: Wine 2
+    simple-region-list:
+      description: Simple region list
+      value:
+        - name: Tuscany
+        - name: Sicily
+    complex-region-list:
+      description: Region list with full information
+      value:
+        - name: Tuscany
+          country:
+            name: Italy
+          producers:
+            - name: Producer 1
+            - name: Producer 2
+          grapes:
+            - name: Grape 1
+            - name: Grape 2
+        - name: Sicily
+          country:
+            name: Italy
+          producers:
+            - name: Producer 1
+            - name: Producer 2
+          grapes:
+            - name: Grape 1
+            - name: Grape 2
+    simple-region:
+      description: Simple region object
+      value:
+        name: Tuscany
+    complex-region:
+      description: Region object with full information
+      value:
+        name: Tuscany
+        country:
+          name: Italy
+        producers:
+          - name: Producer 1
+          - name: Producer 2
+        grapes:
+          - name: Grape 1
+          - name: Grape 2
+    simple-country-list:
+      description: List of simple country objects
+      value:
+        - name: France
+        - name: Italy
+    complex-country-list:
+      description: List of country objects with full information
+      value:
+        - name: France
+          regions:
+            - name: Lyon
+            - name: Bordeaux
+        - name: Italy
+          regions:
+            - name: Tuscany
+            - name: Sicily
+    simple-country:
+      description: Country object only containing the name of the country
+      value:
+        name: France
+    complex-country:
+      description: Country object with list of its associated regions
+      value:
+        name: France
+        regions:
+          - name: Lyon
+          - name: Bordeaux

@@ -1,0 +1,6 @@
+name: username
+in: path
+description: User's unique identifier
+required: true
+schema:
+  type: string

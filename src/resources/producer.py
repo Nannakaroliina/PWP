@@ -8,11 +8,12 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 
 from src.models.producer import Producer
 from src.models.region import Region
 from src.schemas.schemas import ProducerSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND, BAD_REQUEST
 
 producer_schema = ProducerSchema()
 producer_list_schema = ProducerSchema(many=True)
@@ -29,7 +30,10 @@ class ProducerList(Resource):
         Get a list of producers from database
         :return: List of producers
         """
-        return {"producers": producer_list_schema.dump(Producer.find_all())}, 200
+        try:
+            return {"producers": producer_list_schema.dump(Producer.find_all())}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400
 
     @classmethod
     @jwt_required()

@@ -1,0 +1,28 @@
+description: Wwine object list with full information
+value:
+  - name: Wine 1
+    style: Savory and classic
+    wine_type:
+      type: Red
+    producer:
+      name: Producer 1
+    year_produced: 1912
+    alcohol_percentage: 22.5
+    volume: 700
+    picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+    description: A wonderful, warming wine
+    grape:
+      name: Grape 1
+  - name: Wine 2
+    style: Aromatic and floral
+    wine_type:
+      type: White
+    producer:
+      name: Producer 1
+    year_produced: 1999
+    alcohol_percentage: 10.5
+    volume: 500
+    picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+    description: A curious, cooling wine
+    grape:
+      name: Grape 1

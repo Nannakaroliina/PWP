@@ -1,0 +1,15 @@
+description: Wine object with full information
+value:
+  name: Wine 1
+  style: Savory and classic
+  wine_type:
+    type: Red
+  producer:
+    name: Producer 1
+  year_produced: 1912
+  alcohol_percentage: 22.5
+  volume: 700
+  picture: 'https://wine-storage.s3.amazonaws.com/tenuta.png'
+  description: A wonderful, warming wine
+  grape:
+    name: Grape 1

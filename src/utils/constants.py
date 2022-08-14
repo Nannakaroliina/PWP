@@ -12,6 +12,7 @@ ERROR_INSERTING = "Could not add to database."
 ERROR_DELETING = "Item could not be deleted."
 ALREADY_EXISTS = "Item by that name already exists."
 NOT_FOUND = "Item with defined name couldn't be found."
+BAD_REQUEST = "Something went wrong"
 
 # Request related constants
 NOT_JSON = "Request must be JSON."

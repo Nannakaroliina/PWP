@@ -8,11 +8,12 @@ from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from marshmallow import ValidationError
+from werkzeug.exceptions import BadRequest
 
 from src.models.grape import Grape
 from src.models.region import Region
 from src.schemas.schemas import GrapeSchema
-from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND
+from src.utils.constants import ALREADY_EXISTS, ERROR_DELETING, ERROR_INSERTING, NOT_JSON, NOT_FOUND, BAD_REQUEST
 
 grape_schema = GrapeSchema()
 grape_list_schema = GrapeSchema(many=True)
@@ -29,7 +30,10 @@ class GrapeList(Resource):
         Get a list of grapes from database
         :return: List of grapes
         """
-        return {"grapes": grape_list_schema.dump(Grape.find_all())}, 200
+        try:
+            return {"grapes": grape_list_schema.dump(Grape.find_all())}, 200
+        except BadRequest:
+            return {"[ERROR]": BAD_REQUEST}, 400
 
     @classmethod
     @jwt_required()
