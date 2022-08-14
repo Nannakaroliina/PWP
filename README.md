@@ -69,6 +69,7 @@ pip-sync
 
 The deployed project can be found from:
 [Wine Time API & client](https://wine-time-api.herokuapp.com)
+You can find the link to OpenAPI documentation from starting page.
 
 For api end-points, use /api/<end-point> option,
 e.g. api/wines to get all wines
