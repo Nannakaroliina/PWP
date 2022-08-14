@@ -28,8 +28,7 @@ info:
 
     or it's stored to cookies.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
   contact:
     email: tanja.setamaa@student.oulu.fi
 tags:
@@ -377,12 +376,22 @@ paths:
       requestBody:
         description: JSON with data for a new wine
         content:
-          application/json:
+          multipart/form:
             schema:
-              $ref: '#/components/schemas/Wine'
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: '#/components/schemas/Wine'
+                file:
+                  type: string
+                  format: binary
             examples:
-              simple-wine:
+              data:
                 $ref: '#/components/examples/simple-wine'
+              file:
+                value:
+                  file: image.jpg
       responses:
         '201':
           description: Requested wine created
@@ -458,12 +467,22 @@ paths:
       requestBody:
         description: JSON with updated data for wine
         content:
-          application/json:
+          multipart/form:
             schema:
-              $ref: '#/components/schemas/Wine'
+              type: object
+              properties:
+                data:
+                  type: object
+                  $ref: '#/components/schemas/Wine'
+                file:
+                  type: string
+                  format: binary
             examples:
-              simple-wine:
+              data:
                 $ref: '#/components/examples/simple-wine'
+              file:
+                value:
+                  file: image.jpg
       responses:
         '200':
           description: Wine successfully edited

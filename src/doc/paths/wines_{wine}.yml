@@ -52,12 +52,22 @@ patch:
   requestBody:
     description: JSON with updated data for wine
     content:
-      application/json:
+      multipart/form:
         schema:
-          $ref: '../components/schemas/Wine.yml'
+          type: object
+          properties:
+            data:
+              type: object
+              $ref: '../components/schemas/Wine.yml'
+            file:
+              type: string
+              format: binary
         examples:
-          simple-wine:
+          data:
             $ref: '../components/examples/simple-wine.yml'
+          file:
+            value:
+              file: image.jpg
   responses:
     '200':
       description: Wine successfully edited
