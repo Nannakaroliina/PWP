@@ -15,7 +15,7 @@ class Config:
     DEBUG = True
 
     # Database configs
-    SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # AWS configs
